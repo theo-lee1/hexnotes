@@ -7,6 +7,8 @@ import remarkGfm from 'remark-gfm';
 import fs from 'node:fs';
 import path from 'node:path';
 
+const site = process.env.SITE_URL ?? 'https://www.hexnotes.cc';
+
 // 构建前清理 category-colors.json 中已不存在的分类
 const CATEGORY_COLORS_PATH = path.resolve('./category-colors.json');
 const BLOG_DIR = './src/content/blog';
@@ -20,10 +22,6 @@ function loadCategoryColors() {
 	return {};
 }
 
-function saveCategoryColors(colors) {
-	fs.writeFileSync(CATEGORY_COLORS_PATH, JSON.stringify(colors, null, 2));
-}
-
 function getActualCategories() {
 	try {
 		return fs.readdirSync(BLOG_DIR)
@@ -32,21 +30,13 @@ function getActualCategories() {
 				const src = fs.readFileSync(path.join(BLOG_DIR, f), 'utf-8');
 				const match = src.match(/^---\r?\n([\s\S]*?)\r?\n---/);
 				if (!match) return null;
+				if (/^draft:\s*true\s*$/m.test(match[1])) return null;
 				const catMatch = match[1].match(/^category:\s*(.+)$/m);
 				return catMatch ? catMatch[1].trim() : null;
 			})
 			.filter(Boolean);
 	} catch {
 		return [];
-	}
-}
-
-function pruneCategoryColors(actualCategories) {
-	const colors = loadCategoryColors();
-	const actual = new Set(actualCategories);
-	const next = Object.fromEntries(Object.entries(colors).filter(([k]) => actual.has(k)));
-	if (Object.keys(next).length !== Object.keys(colors).length) {
-		saveCategoryColors(next);
 	}
 }
 
@@ -72,7 +62,7 @@ function categoryCleanupIntegration() {
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://example.com',
+	site,
 	integrations: [mdx(), sitemap(), categoryCleanupIntegration()],
 	markdown: {
 		remarkPlugins: [remarkGfm],

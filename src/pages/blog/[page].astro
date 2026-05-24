@@ -7,10 +7,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { sortPosts } from '../../lib/content';
 
 export async function getStaticPaths() {
-  const allPosts = sortPosts(await getCollection('blog'));
+  const allPosts = sortPosts(await getCollection('blog', ({ data }) => !data.draft));
   const totalPages = Math.ceil(allPosts.length / 10);
 
-  return Array.from({ length: totalPages - 1 }, (_, i) => ({
+  return Array.from({ length: Math.max(0, totalPages - 1) }, (_, i) => ({
     params: { page: String(i + 2) },
     props: {
       posts: allPosts.slice((i + 1) * 10, (i + 2) * 10),

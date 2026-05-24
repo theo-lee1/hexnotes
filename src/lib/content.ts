@@ -6,7 +6,7 @@ export type BlogPost = CollectionEntry<'blog'>;
 
 const CATEGORY_COLORS_PATH = path.resolve('./category-colors.json');
 
-// 20个分类颜色池 - 精选风格
+// 分类颜色池 - 精选风格
 export const COLOR_POOL = [
 	'#FF5C5C', // 红
 	'#FF9F43', // 橙
@@ -28,6 +28,7 @@ export const COLOR_POOL = [
 	'#8000FF', // 紫
 	'#F8B4FF', // 浅粉
 	'#FF4D00', // 橙红
+	'#455A64', // 蓝灰
 ];
 
 function loadCategoryColors(): Record<string, string> {
@@ -53,7 +54,9 @@ export function getCategoryColor(category: string): string {
 	// 新分类：随机从池子里取一个未使用的颜色
 	const usedColors = new Set(Object.values(colors));
 	const unusedColors = COLOR_POOL.filter(c => !usedColors.has(c));
-	const nextColor = unusedColors[Math.floor(Math.random() * unusedColors.length)] || '#455A64';
+	const nextColor =
+		unusedColors[Math.floor(Math.random() * unusedColors.length)] ||
+		COLOR_POOL[Math.abs(hashString(category)) % COLOR_POOL.length];
 	colors[category] = nextColor;
 	saveCategoryColors(colors);
 	return nextColor;
@@ -80,7 +83,6 @@ export function slugify(value: string) {
 		写作: 'writing',
 		设计: 'design',
 		运维: 'ops',
-		测试: 'test',
 		部署: 'deploy',
 		静态站点: 'static-site',
 		知识库: 'knowledge-base',

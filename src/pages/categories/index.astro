@@ -4,7 +4,7 @@ import PageHero from '../../components/PageHero.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { countBy, getCategoryColor, slugify } from '../../lib/content';
 
-const posts = await getCollection('blog');
+const posts = await getCollection('blog', ({ data }) => !data.draft);
 const categories = countBy(posts, (post) => post.data.category);
 ---
 

@@ -26,7 +26,8 @@ const { title = SITE_TITLE, description = SITE_DESCRIPTION } = Astro.props;
 			</main>
 			<Footer />
 		</div>
-		<script>
+		<script is:inline>
+			// @ts-nocheck
 			const readPx = (styles, name, fallback) => {
 				const value = Number.parseFloat(styles.getPropertyValue(name));
 				return Number.isFinite(value) ? value : fallback;
@@ -42,7 +43,7 @@ const { title = SITE_TITLE, description = SITE_DESCRIPTION } = Astro.props;
 			const snap = (value, size, origin) => Math.round((value - origin) / size) * size + origin;
 			const normalize = (value, size) => ((value % size) + size) % size;
 			const alignCardGrid = (target) => {
-				if (!target?.matches?.('.note-card')) return;
+				if (!(target instanceof HTMLElement) || !target.matches('.note-card')) return;
 				const grid = readGrid();
 				const rect = target.getBoundingClientRect();
 				const styles = window.getComputedStyle(target);
@@ -52,15 +53,18 @@ const { title = SITE_TITLE, description = SITE_DESCRIPTION } = Astro.props;
 				target.style.setProperty('--note-card-grid-offset-y', `${normalize(grid.originY - pageTop, grid.size)}px`);
 			};
 			const clearCardGrid = (target) => {
-				target?.style?.removeProperty('--note-card-grid-offset-x');
-				target?.style?.removeProperty('--note-card-grid-offset-y');
+				if (!(target instanceof HTMLElement)) return;
+				target.style.removeProperty('--note-card-grid-offset-x');
+				target.style.removeProperty('--note-card-grid-offset-y');
 			};
 			const gridEl = document.querySelector('.ambient-grid');
 			let chargeId = 0;
 			const updateGridHeight = () => {
 				const shell = document.querySelector('.site-shell');
 				const bottom = shell ? shell.getBoundingClientRect().bottom + window.scrollY : 0;
-				gridEl?.style.setProperty('--ambient-height', `${Math.max(bottom, window.innerHeight)}px`);
+				if (gridEl instanceof HTMLElement) {
+					gridEl.style.setProperty('--ambient-height', `${Math.max(bottom, window.innerHeight)}px`);
+				}
 			};
 			const createCharge = () => {
 				if (!gridEl || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -99,6 +103,7 @@ const { title = SITE_TITLE, description = SITE_DESCRIPTION } = Astro.props;
 				gridEl.append(pulse);
 				window.setTimeout(() => pulse.remove(), 1200);
 			};
+			/** @type {HTMLElement | null} */
 			let hoverTarget = null;
 			const motionSelector = '.console-masthead,.console-feature,.console-visual,.console-index,.index-row,.console-topics,.console-timeline,.comment-line,.topic-route-feature,.topic-route,.note-card,.tag-cloud-grid,.tag-node,.category-browser-card,.reading-surface,.site-footer,.archive-rail,.archive-month-toggle,.archive-event,.pagination';
 			const clearHover = () => {
@@ -109,6 +114,7 @@ const { title = SITE_TITLE, description = SITE_DESCRIPTION } = Astro.props;
 			};
 			const updateHover = (event) => {
 				const target = event.target instanceof Element ? event.target.closest(motionSelector) : null;
+				if (target && !(target instanceof HTMLElement)) return;
 				if (hoverTarget && hoverTarget !== target) {
 					clearHover();
 				}
@@ -132,7 +138,7 @@ const { title = SITE_TITLE, description = SITE_DESCRIPTION } = Astro.props;
 			};
 			updateGridHeight();
 			for (let i = 0; i < 6; i++) window.setTimeout(createCharge, i * 220);
-			const chargeTimer = window.setInterval(() => {
+			window.setInterval(() => {
 				createCharge();
 				createCharge();
 			}, 3000);

@@ -6,7 +6,7 @@ import Pagination from '../../components/Pagination.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { sortPosts } from '../../lib/content';
 
-const allPosts = sortPosts(await getCollection('blog'));
+const allPosts = sortPosts(await getCollection('blog', ({ data }) => !data.draft));
 const totalPages = Math.ceil(allPosts.length / 10);
 const posts = allPosts.slice(0, 10);
 ---

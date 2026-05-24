@@ -4,7 +4,7 @@ import PageHero from '../../components/PageHero.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { formatDate, postsByMonth } from '../../lib/content';
 
-const posts = await getCollection('blog');
+const posts = await getCollection('blog', ({ data }) => !data.draft);
 const months = postsByMonth(posts);
 ---
 
@@ -34,9 +34,13 @@ const months = postsByMonth(posts);
 		</div>
 	</div>
 
-	<script>
-		document.querySelectorAll('.archive-month').forEach((details) => {
+	<script is:inline>
+		// @ts-nocheck
+		document.querySelectorAll('.archive-month').forEach((node) => {
+			if (!(node instanceof HTMLDetailsElement)) return;
+			const details = node;
 			const summary = details.querySelector('.archive-month-toggle');
+			/** @type {number | null} */
 			let anchorTop = null;
 
 			const rememberAnchor = () => {

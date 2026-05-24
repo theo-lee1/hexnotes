@@ -1,11 +1,17 @@
 ---
-import type { CollectionEntry, MarkdownHeading } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
 import { formatDate, getCategoryColor, slugify } from '../lib/content';
 
 interface Props {
 	post: CollectionEntry<'blog'>;
 	headings: MarkdownHeading[];
+}
+
+interface MarkdownHeading {
+	depth: number;
+	slug: string;
+	text: string;
 }
 
 const { post, headings } = Astro.props;
@@ -26,7 +32,7 @@ const accent = getCategoryColor(post.data.category);
 						<path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" fill="none" stroke="currentColor" stroke-width="1.8" />
 						<circle cx="12" cy="12" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8" />
 					</svg>
-					{post.body.length} 字
+					{(post.body ?? '').length} 字
 				</span>
 			</div>
 			<h1>{post.data.title}</h1>
@@ -68,7 +74,6 @@ const accent = getCategoryColor(post.data.category);
 	}
 
 		<script>
-		const copyIcon = '复制';
 		const copiedIcon = '已复制';
 
 		document.querySelectorAll('pre').forEach((pre) => {
@@ -119,12 +124,16 @@ const accent = getCategoryColor(post.data.category);
 		});
 
 		document.querySelectorAll('.markdown-content img').forEach((image) => {
+			if (!(image instanceof HTMLImageElement)) return;
 			image.closest('p')?.classList.add('markdown-figure');
 			image.addEventListener('click', () => {
 				const overlay = document.createElement('button');
 				overlay.className = 'image-preview';
 				overlay.type = 'button';
-				overlay.innerHTML = `<img src="${image.getAttribute('src')}" alt="${image.getAttribute('alt') || ''}">`;
+				const preview = document.createElement('img');
+				preview.src = image.currentSrc || image.src;
+				preview.alt = image.alt || '';
+				overlay.append(preview);
 				overlay.addEventListener('click', () => overlay.remove());
 				document.body.append(overlay);
 			});
@@ -149,7 +158,7 @@ const accent = getCategoryColor(post.data.category);
 		const links = [...document.querySelectorAll('.article-toc a')];
 		const headings = links
 			.map((link) => document.getElementById(link.getAttribute('href')?.slice(1) || ''))
-			.filter(Boolean);
+			.filter((heading) => heading instanceof Element);
 		const updateTocVisibility = () => {
 			const visible = window.scrollY > 320;
 			toc?.classList.toggle('is-visible', visible);

@@ -14,6 +14,7 @@ const blog = defineCollection({
 			updatedDate: z.coerce.date().optional(),
 			category: z.string(),
 			tags: z.array(z.string()).default([]),
+			draft: z.boolean().default(false),
 			accent: z.string().default('#38cfff'),
 			featured: z.boolean().default(false),
 			heroImage: z.optional(image()),

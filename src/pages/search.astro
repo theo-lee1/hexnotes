@@ -4,13 +4,18 @@ import PageHero from '../components/PageHero.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCategoryColor, slugify, sortPosts } from '../lib/content';
 
-const posts = sortPosts(await getCollection('blog'));
+const posts = sortPosts(await getCollection('blog', ({ data }) => !data.draft));
 const POSTS_PER_PAGE = 10;
 
 const postsData = posts.map(p => ({
   id: p.id,
-  data: p.data,
-  body: p.body,
+  title: p.data.title,
+  description: p.data.description,
+  category: p.data.category,
+  categorySlug: slugify(p.data.category),
+  tags: p.data.tags.map((tag) => ({ name: tag, slug: slugify(tag) })),
+  pubDate: p.data.pubDate,
+  wordCount: (p.body ?? '').length,
   categoryColor: getCategoryColor(p.data.category),
 }));
 const postsJson = JSON.stringify(postsData);
@@ -25,23 +30,35 @@ const postsJson = JSON.stringify(postsData);
 	</section>
 </BaseLayout>
 
-<script define:vars={{ postsJson, POSTS_PER_PAGE }}>
+<script is:inline define:vars={{ postsJson, POSTS_PER_PAGE }}>
+// @ts-nocheck
 const allPosts = JSON.parse(postsJson);
 const searchSummary = document.getElementById('search-summary');
 const searchResults = document.getElementById('search-results');
 const paginationEl = document.getElementById('pagination');
 
-// slugify from lib/content
-
 function searchPosts(query, posts) {
   if (!query.trim()) return [];
   const keyword = query.trim().toLowerCase();
   return posts.filter(post =>
-    post.data.title.toLowerCase().includes(keyword) ||
-    post.data.description.toLowerCase().includes(keyword) ||
-    post.data.category.toLowerCase().includes(keyword) ||
-    post.data.tags.some(t => t.toLowerCase().includes(keyword))
+    post.title.toLowerCase().includes(keyword) ||
+    post.description.toLowerCase().includes(keyword) ||
+    post.category.toLowerCase().includes(keyword) ||
+    post.tags.some(t => t.name.toLowerCase().includes(keyword))
   );
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function escapeAttr(value) {
+  return escapeHtml(value).replace(/`/g, '&#96;');
 }
 
 function getPages(current, total) {
@@ -74,12 +91,12 @@ function renderPagination(query, page, total) {
     <nav class="pagination" aria-label="分页导航">
       <span class="pagination-summary">第 ${page} / ${total} 页，共 ${total} 页</span>
       <div class="pagination-links">
-        <a href="javascript:void(0)" class="pagination-step ${prevDisabled}" data-page="${page - 1}" data-query="${encodeURIComponent(query)}">${prevText}</a>
+        <button type="button" class="pagination-step ${prevDisabled}" data-page="${page - 1}" data-query="${encodeURIComponent(query)}">${prevText}</button>
         ${pages.map(p => p === '...'
           ? '<span class="is-ellipsis" aria-hidden="true">...</span>'
-          : `<a href="javascript:void(0)" class="pagination-page ${p === page ? 'is-active' : ''}" data-page="${p}" data-query="${encodeURIComponent(query)}">${p}</a>`
+          : `<button type="button" class="pagination-page ${p === page ? 'is-active' : ''}" data-page="${p}" data-query="${encodeURIComponent(query)}">${p}</button>`
         ).join('')}
-        <a href="javascript:void(0)" class="pagination-step ${nextDisabled}" data-page="${page + 1}" data-query="${encodeURIComponent(query)}">${nextText}</a>
+        <button type="button" class="pagination-step ${nextDisabled}" data-page="${page + 1}" data-query="${encodeURIComponent(query)}">${nextText}</button>
       </div>
     </nav>
   `;
@@ -97,13 +114,13 @@ function render(query, page = 1) {
   const paginated = filtered.slice(start, start + POSTS_PER_PAGE);
 
   if (!query.trim()) {
-    searchSummary.innerHTML = '输入关键词后查看匹配结果。';
+    searchSummary.textContent = '输入关键词后查看匹配结果。';
     searchResults.innerHTML = '';
     paginationEl.innerHTML = '';
     return;
   }
 
-  searchSummary.innerHTML = `找到 <strong>${filtered.length}</strong> 条与 "<strong>${query.trim()}</strong>" 相关的内容。`;
+  searchSummary.innerHTML = `找到 <strong>${filtered.length}</strong> 条与 "<strong>${escapeHtml(query.trim())}</strong>" 相关的内容。`;
 
   if (paginated.length === 0) {
     searchResults.innerHTML = '<p class="no-results">没有找到匹配的内容。</p>';
@@ -117,38 +134,42 @@ function render(query, page = 1) {
     const g = parseInt(accent.slice(3, 5), 16);
     const b = parseInt(accent.slice(5, 7), 16);
     const accentRgb = `${r}, ${g}, ${b}`;
-    const href = `/blog/${post.id}/`;
-    const date = formatDate(post.data.pubDate);
+    const href = `/blog/${encodeURIComponent(post.id)}/`;
+    const date = formatDate(post.pubDate);
+    const safeTitle = escapeHtml(post.title);
+    const safeDescription = escapeHtml(post.description);
+    const safeCategory = escapeHtml(post.category);
+    const safeCategorySlug = escapeAttr(post.categorySlug);
 
     return `
     <article class="note-card article-card-concept article-card-concept-index-slab" style="--note-accent: ${accent}; --note-accent-rgb: ${accentRgb}">
       <div class="article-card-concept-body note-card-body">
         <p class="article-card-concept-meta note-card-meta">
-          <a href="/categories/${slugify(post.data.category)}/" class="note-card-category">${post.data.category}</a>
-          <time datetime="${post.data.pubDate}">${date}</time>
+          <a href="/categories/${safeCategorySlug}/" class="note-card-category">${safeCategory}</a>
+          <time datetime="${escapeAttr(post.pubDate)}">${date}</time>
           <span class="note-card-views">
             <svg aria-hidden="true" viewBox="0 0 24 24" width="13" height="13">
               <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" fill="none" stroke="currentColor" stroke-width="1.8"/>
               <circle cx="12" cy="12" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/>
             </svg>
-            ${post.body.length} 字
+            ${post.wordCount} 字
           </span>
         </p>
         <h3>
-          <a href="${href}" class="note-card-title">${post.data.title}</a>
+          <a href="${href}" class="note-card-title">${safeTitle}</a>
         </h3>
-        <p>${post.data.description}</p>
+        <p>${safeDescription}</p>
       </div>
       <div class="article-card-concept-bottom note-card-bottom">
         <div class="topic-chips">
-          ${post.data.tags.map(tag => `
-            <a href="/tags/${slugify(tag)}/" class="topic-chip">
+          ${post.tags.map(tag => `
+            <a href="/tags/${escapeAttr(tag.slug)}/" class="topic-chip">
               <span class="topic-chip-prefix" aria-hidden="true">#</span>
-              <span>${tag}</span>
+              <span>${escapeHtml(tag.name)}</span>
             </a>
           `).join('')}
         </div>
-        <a href="${href}" class="read-link" aria-label="阅读 ${post.data.title}">
+        <a href="${href}" class="read-link" aria-label="阅读 ${escapeAttr(post.title)}">
           阅读
           <svg aria-hidden="true" viewBox="0 0 24 24" width="15" height="15">
             <path d="M7 17 17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -161,7 +182,7 @@ function render(query, page = 1) {
 
   paginationEl.innerHTML = renderPagination(query, safePage, totalPages);
 
-  paginationEl.querySelectorAll('a.pagination-step:not(.is-disabled)').forEach(btn => {
+  paginationEl.querySelectorAll('button.pagination-step:not(.is-disabled)').forEach(btn => {
     btn.addEventListener('click', () => {
       const p = parseInt(btn.dataset.page);
       const q = decodeURIComponent(btn.dataset.query);
@@ -170,7 +191,7 @@ function render(query, page = 1) {
     });
   });
 
-  paginationEl.querySelectorAll('a.pagination-page').forEach(btn => {
+  paginationEl.querySelectorAll('button.pagination-page').forEach(btn => {
     btn.addEventListener('click', () => {
       const p = parseInt(btn.dataset.page);
       const q = decodeURIComponent(btn.dataset.query);
@@ -187,16 +208,14 @@ if (initialQuery) {
   render(initialQuery, 1);
 }
 
-// 监听 URL 变化（导航栏搜索框会用 replaceState 更新 URL）
-let lastUrl = window.location.href;
-setInterval(() => {
-  if (window.location.href !== lastUrl) {
-    lastUrl = window.location.href;
-    const params = new URLSearchParams(window.location.search);
-    const q = params.get('q') || '';
-    render(q, 1);
-  }
-}, 200);
+window.addEventListener('hexnotes:search-query-change', (event) => {
+  render(event.detail?.q || '', 1);
+});
+
+window.addEventListener('popstate', () => {
+  const params = new URLSearchParams(window.location.search);
+  render(params.get('q') || '', 1);
+});
 </script>
 
 <style>
@@ -250,7 +269,8 @@ setInterval(() => {
   gap: 8px;
 }
 
-.pagination-links a {
+.pagination-links a,
+.pagination-links button {
   display: inline-flex;
   min-width: 38px;
   min-height: 36px;
@@ -268,9 +288,15 @@ setInterval(() => {
 }
 
 .pagination-links a:hover {
-  border-color: rgba(124, 183, 255, 0.28);
-  background: rgba(124, 183, 255, 0.08);
-  color: var(--ink);
+	border-color: rgba(124, 183, 255, 0.28);
+	background: rgba(124, 183, 255, 0.08);
+	color: var(--ink);
+}
+
+.pagination-links button:hover {
+	border-color: rgba(124, 183, 255, 0.28);
+	background: rgba(124, 183, 255, 0.08);
+	color: var(--ink);
 }
 
 .is-ellipsis {
@@ -349,6 +375,7 @@ setInterval(() => {
   }
 
   .pagination-links a,
+  .pagination-links button,
   .pagination-step,
   .is-disabled,
   .pagination-page,
@@ -363,7 +390,8 @@ setInterval(() => {
     font-size: 0.75rem;
   }
 
-  .pagination-links a {
+  .pagination-links a,
+  .pagination-links button {
     min-width: 28px;
     padding: 0;
   }

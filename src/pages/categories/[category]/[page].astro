@@ -4,22 +4,19 @@ import ArticleCard from '../../../components/ArticleCard.astro';
 import PageHero from '../../../components/PageHero.astro';
 import Pagination from '../../../components/Pagination.astro';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import { getCategoryColor, slugify, sortPosts } from '../../../lib/content';
+import { slugify, sortPosts } from '../../../lib/content';
 
 export async function getStaticPaths() {
-	const allPosts = await getCollection('blog');
+	const allPosts = await getCollection('blog', ({ data }) => !data.draft);
 	const allCategories = [...new Set(allPosts.map((post) => post.data.category))];
 
 	return allCategories.flatMap((category) => {
 		const posts = sortPosts(allPosts.filter((post) => post.data.category === category));
 		const totalPages = Math.ceil(posts.length / 10);
-		const color = getCategoryColor(category);
-
 		return Array.from({ length: totalPages }, (_, i) => ({
 			params: { category: slugify(category), page: String(i + 1) },
 			props: {
 				category,
-				color,
 				posts: posts.slice(i * 10, (i + 1) * 10),
 				currentPage: i + 1,
 				totalPages,
@@ -28,7 +25,7 @@ export async function getStaticPaths() {
 	});
 }
 
-const { category, color, posts, currentPage, totalPages } = Astro.props;
+const { category, posts, currentPage, totalPages } = Astro.props;
 ---
 
 <BaseLayout title={`${category} | Hex Notes`} description={`${category} 相关的文章。`}>
