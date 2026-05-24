@@ -1,0 +1,102 @@
+---
+import { getCollection } from 'astro:content';
+import PageHero from '../../components/PageHero.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { countBy, getCategoryColor, slugify } from '../../lib/content';
+
+const posts = await getCollection('blog');
+const categories = countBy(posts, (post) => post.data.category);
+---
+
+<BaseLayout title="分类 | Hex Notes" description="按分类查看所有文章。">
+	<PageHero title="分类" description="按分类查看所有文章。" />
+	<div class="category-browser">
+		<div class="category-browser-grid">
+			{categories.map(([category, count]) => (
+				<a class="category-browser-card" href={`/categories/${slugify(category)}/`} style={`--cat-accent: ${getCategoryColor(category)}`}>
+					<div class="category-browser-card-head">
+						<span class="category-browser-dot"></span>
+						<strong>{category}</strong>
+					</div>
+					<span class="category-browser-count">{count} 篇</span>
+				</a>
+			))}
+		</div>
+	</div>
+</BaseLayout>
+
+<style>
+	.category-browser {
+		padding: 0 24px 40px;
+	}
+
+	.category-browser-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+		gap: 14px;
+		padding: 20px;
+	}
+
+	.category-browser-card {
+		--cat-accent: var(--blue);
+		position: relative;
+		display: grid;
+		grid-template-rows: auto auto 1fr;
+		gap: 8px;
+		padding: 18px 20px 16px;
+		background: color-mix(in srgb, var(--cat-accent) 5%, transparent);
+		border-left: 2px solid var(--cat-accent);
+		transition: all 0.2s ease;
+	}
+
+	.category-browser-card:hover {
+		z-index: 2;
+		transform: translateY(-2px);
+		background: color-mix(in srgb, var(--cat-accent) 10%, transparent);
+		box-shadow: 0 10px 24px rgba(3, 6, 12, 0.14);
+	}
+
+	.category-browser-card-head {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.category-browser-dot {
+		flex-shrink: 0;
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: var(--cat-accent);
+		box-shadow: 0 0 8px color-mix(in srgb, var(--cat-accent) 50%, transparent);
+	}
+
+	.category-browser-card-head strong {
+		font-family: var(--font-geist-mono), monospace;
+		font-size: 1.1rem;
+		font-weight: 500;
+		color: var(--ink);
+		line-height: 1.2;
+	}
+
+	.category-browser-count {
+		font-family: var(--font-geist-mono), monospace;
+		font-size: 0.7rem;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: color-mix(in srgb, var(--cat-accent) 68%, var(--ink-soft));
+		padding-left: 18px;
+	}
+
+	@media (max-width: 720px) {
+		.category-browser {
+			padding: 0 12px 24px;
+		}
+
+		.category-browser-grid {
+			padding: 12px;
+			gap: 12px;
+			grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+		}
+	}
+</style>

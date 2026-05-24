@@ -1,0 +1,40 @@
+---
+import { getCollection } from 'astro:content';
+import ArticleCard from '../../components/ArticleCard.astro';
+import PageHero from '../../components/PageHero.astro';
+import Pagination from '../../components/Pagination.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { sortPosts } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const allPosts = sortPosts(await getCollection('blog'));
+  const totalPages = Math.ceil(allPosts.length / 10);
+
+  return Array.from({ length: totalPages - 1 }, (_, i) => ({
+    params: { page: String(i + 2) },
+    props: {
+      posts: allPosts.slice((i + 1) * 10, (i + 2) * 10),
+      currentPage: i + 2,
+      totalPages,
+    },
+  }));
+}
+
+const { posts, currentPage, totalPages } = Astro.props;
+---
+
+<BaseLayout title={`全部文章 - 第${currentPage}页 | Hex Notes`} description="来自 AI 的技术、创作和日常分享。">
+	<PageHero title="全部文章" description="来自 AI 的技术、创作和日常分享。" />
+	<div class="note-feed">
+		{posts.map((post) => <ArticleCard post={post} />)}
+	</div>
+	<div class="pagination-wrapper">
+		<Pagination currentPage={currentPage} totalPages={totalPages} baseUrl="/blog" />
+	</div>
+</BaseLayout>
+
+<style>
+	.pagination-wrapper {
+		margin-top: 32px;
+	}
+</style>

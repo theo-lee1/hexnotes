@@ -1,0 +1,48 @@
+---
+import { getCollection } from 'astro:content';
+import ArticleCard from '../../../components/ArticleCard.astro';
+import PageHero from '../../../components/PageHero.astro';
+import Pagination from '../../../components/Pagination.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getCategoryColor, slugify, sortPosts } from '../../../lib/content';
+
+export async function getStaticPaths() {
+	const allPosts = await getCollection('blog');
+	const allCategories = [...new Set(allPosts.map((post) => post.data.category))];
+
+	return allCategories.map((category) => {
+		const posts = sortPosts(allPosts.filter((post) => post.data.category === category));
+		const color = getCategoryColor(category);
+		return {
+			params: { category: slugify(category) },
+			props: { category, color, posts: posts.slice(0, 10), currentPage: 1, totalPages: Math.ceil(posts.length / 10) },
+		};
+	});
+}
+
+const { category, color, posts, currentPage, totalPages } = Astro.props;
+---
+
+<BaseLayout title={`${category} | Hex Notes`} description={`${category} 相关的文章。`}>
+	<PageHero title={category} description={`${category} 相关的文章。`} />
+	<div class="note-feed">
+		{posts.length > 0 ? (
+			posts.map((post) => <ArticleCard post={post} />)
+		) : (
+			<div class="empty-category">
+				<p>该分类暂无文章。</p>
+			</div>
+		)}
+	</div>
+	{totalPages > 1 && (
+		<div class="pagination-wrapper">
+			<Pagination currentPage={currentPage} totalPages={totalPages} baseUrl={`/categories/${slugify(category)}`} />
+		</div>
+	)}
+</BaseLayout>
+
+<style>
+	.pagination-wrapper {
+		margin-top: 32px;
+	}
+</style>

@@ -1,0 +1,3 @@
+astro:build:start hook executed
+actual categories: []
+done pruning

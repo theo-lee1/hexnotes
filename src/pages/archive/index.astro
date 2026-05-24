@@ -1,0 +1,72 @@
+---
+import { getCollection } from 'astro:content';
+import PageHero from '../../components/PageHero.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate, postsByMonth } from '../../lib/content';
+
+const posts = await getCollection('blog');
+const months = postsByMonth(posts);
+---
+
+<BaseLayout title="归档 | Hex Notes" description="按发布时间查看所有文章。">
+	<div class="page-stack">
+		<PageHero title="归档" description="按发布时间查看所有文章。" />
+		<div class="archive-rail">
+			{
+				months.map(([month, items], index) => (
+					<details class="archive-month" open={index === 0}>
+						<summary class="archive-month-toggle">
+							<span>{month}</span>
+							<small>{items.length} 篇</small>
+						</summary>
+						<div class="archive-month-list">
+							{items.map((post, noteIndex) => (
+								<a class="archive-event" href={`/blog/${post.id}/`} style={`animation-delay: ${noteIndex * 55}ms`}>
+									<span class="archive-dot"></span>
+									<time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+									<strong>{post.data.title}</strong>
+								</a>
+							))}
+						</div>
+					</details>
+				))
+			}
+		</div>
+	</div>
+
+	<script>
+		document.querySelectorAll('.archive-month').forEach((details) => {
+			const summary = details.querySelector('.archive-month-toggle');
+			let anchorTop = null;
+
+			const rememberAnchor = () => {
+				anchorTop = summary?.getBoundingClientRect().top ?? null;
+			};
+			const restoreAnchor = () => {
+				if (!details.open || anchorTop === null || !summary) return;
+				const currentTop = summary.getBoundingClientRect().top;
+				const correction = currentTop - anchorTop;
+				if (Math.abs(correction) > 1) {
+					window.scrollBy({ top: correction, left: 0, behavior: 'auto' });
+				}
+			};
+
+			summary?.addEventListener('pointerdown', rememberAnchor, { passive: true });
+			summary?.addEventListener('keydown', rememberAnchor);
+			details.addEventListener('toggle', () => {
+				if (!details.open) {
+					anchorTop = null;
+					return;
+				}
+				restoreAnchor();
+				requestAnimationFrame(() => {
+					restoreAnchor();
+					requestAnimationFrame(() => {
+						restoreAnchor();
+						anchorTop = null;
+					});
+				});
+			});
+		});
+	</script>
+</BaseLayout>

@@ -1,0 +1,85 @@
+---
+import { SITE_TITLE } from '../consts';
+import HeaderLink from './HeaderLink.astro';
+---
+
+<header class="site-header" data-site-header>
+	<a class="site-brand" href="/" aria-label={SITE_TITLE}>
+		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="brand-mark-icon">
+			<path d="M12 8V4H8" />
+			<rect width="16" height="12" x="4" y="8" rx="2" />
+			<path d="M2 14h2" />
+			<path d="M20 14h2" />
+			<path d="M15 13v2" />
+			<path d="M9 13v2" />
+		</svg>
+		<span><strong>{SITE_TITLE}</strong></span>
+	</a>
+	<div class="site-header-search">
+		<form class="command-search" id="header-search-form" action="/search/" method="get" role="search">
+			<input name="q" type="search" placeholder="搜索文章、分类和标签" autocomplete="off" />
+			<button type="submit" aria-label="搜索">
+				<svg aria-hidden="true" viewBox="0 0 24 24" width="15" height="15">
+					<path d="m20 20-4.5-4.5M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+				</svg>
+			</button>
+		</form>
+	</div>
+	<button class="site-menu-toggle" type="button" aria-label="打开导航" aria-expanded="false" data-menu-toggle>
+		<span></span>
+		<span></span>
+		<span></span>
+	</button>
+	<div class="site-mobile-panel">
+		<div class="site-mobile-panel-inner">
+			<form class="site-mobile-search command-search command-search-compact" id="mobile-search-form" action="/search/" method="get" role="search">
+				<input name="q" type="search" placeholder="搜索文章、分类和标签" autocomplete="off" />
+				<button type="submit" aria-label="搜索">
+					<svg aria-hidden="true" viewBox="0 0 24 24" width="15" height="15">
+						<path d="m20 20-4.5-4.5M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+					</svg>
+				</button>
+			</form>
+			<nav class="site-nav" aria-label="主导航">
+				<HeaderLink href="/">首页</HeaderLink>
+				<HeaderLink href="/blog">文章</HeaderLink>
+				<HeaderLink href="/categories">分类</HeaderLink>
+				<HeaderLink href="/tags">标签</HeaderLink>
+				<HeaderLink href="/archive">归档</HeaderLink>
+				<HeaderLink href="/about">关于</HeaderLink>
+			</nav>
+		</div>
+	</div>
+</header>
+
+<script>
+	const header = document.querySelector('[data-site-header]');
+	const toggle = document.querySelector('[data-menu-toggle]');
+	toggle?.addEventListener('click', () => {
+		const open = !header?.classList.contains('is-menu-open');
+		header?.classList.toggle('is-menu-open', open);
+		toggle.setAttribute('aria-expanded', String(open));
+		toggle.setAttribute('aria-label', open ? '关闭导航' : '打开导航');
+	});
+
+	// 导航栏搜索框实时更新 URL（不刷新页面）
+	// 仅在搜索页启用实时搜索，其他页只有输入框初始化
+	['header-search-form', 'mobile-search-form'].forEach(id => {
+		const form = document.getElementById(id);
+		const input = form?.querySelector('input');
+		// 页面加载时从 URL 初始化输入框
+		if (input) {
+			const params = new URLSearchParams(window.location.search);
+			input.value = params.get('q') || '';
+		}
+		input?.addEventListener('input', () => {
+			// 仅在搜索页实时更新 URL
+			if (!window.location.pathname.startsWith('/search')) return;
+			const q = input.value;
+			const url = new URL(window.location);
+			if (q) url.searchParams.set('q', q);
+			else url.searchParams.delete('q');
+			window.history.replaceState({}, '', url);
+		});
+	});
+</script>

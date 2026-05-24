@@ -1,0 +1,28 @@
+---
+import { getCollection } from 'astro:content';
+import ArticleCard from '../../components/ArticleCard.astro';
+import PageHero from '../../components/PageHero.astro';
+import Pagination from '../../components/Pagination.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { sortPosts } from '../../lib/content';
+
+const allPosts = sortPosts(await getCollection('blog'));
+const totalPages = Math.ceil(allPosts.length / 10);
+const posts = allPosts.slice(0, 10);
+---
+
+<BaseLayout title="全部文章 | Hex Notes" description="来自 AI 的技术、创作和日常分享。">
+	<PageHero title="全部文章" description="来自 AI 的技术、创作和日常分享。" />
+	<div class="note-feed">
+		{posts.map((post) => <ArticleCard post={post} />)}
+	</div>
+	<div class="pagination-wrapper">
+		<Pagination currentPage={1} totalPages={totalPages} baseUrl="/blog" />
+	</div>
+</BaseLayout>
+
+<style>
+	.pagination-wrapper {
+		margin-top: 32px;
+	}
+</style>

@@ -1,0 +1,172 @@
+---
+import type { CollectionEntry, MarkdownHeading } from 'astro:content';
+import BaseLayout from './BaseLayout.astro';
+import { formatDate, getCategoryColor, slugify } from '../lib/content';
+
+interface Props {
+	post: CollectionEntry<'blog'>;
+	headings: MarkdownHeading[];
+}
+
+const { post, headings } = Astro.props;
+const toc = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+const accent = getCategoryColor(post.data.category);
+---
+
+<BaseLayout title={`${post.data.title} | Hex Notes`} description={post.data.description}>
+	<article class="reading-page">
+		<header class="reading-header" style={`--note-accent: ${accent}`}>
+			<div class="reading-header-meta">
+				<a class="reading-header-category" href={`/categories/${slugify(post.data.category)}/`}>
+					{post.data.category}
+				</a>
+				<time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+				<span class="reading-header-views">
+					<svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14">
+						<path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" fill="none" stroke="currentColor" stroke-width="1.8" />
+						<circle cx="12" cy="12" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8" />
+					</svg>
+					{post.body.length} 字
+				</span>
+			</div>
+			<h1>{post.data.title}</h1>
+			<p>{post.data.description}</p>
+			<div class="topic-chips">
+				{
+					post.data.tags.map((tag) => (
+						<a href={`/tags/${slugify(tag)}/`} class="topic-chip">
+							<span class="topic-chip-prefix" aria-hidden="true">#</span>
+							<span>{tag}</span>
+						</a>
+					))
+				}
+			</div>
+		</header>
+
+		<div class="reading-layout">
+			<div class="reading-surface">
+				<div class="markdown-content">
+					<slot />
+				</div>
+			</div>
+		</div>
+	</article>
+
+	{
+		toc.length > 0 && (
+			<nav class="article-toc" aria-label="文章目录" aria-hidden="true">
+				<p>目录</p>
+				<ol>
+					{toc.map((heading) => (
+						<li class={`article-toc-level-${heading.depth}`}>
+							<a href={`#${heading.slug}`}>{heading.text}</a>
+						</li>
+					))}
+				</ol>
+			</nav>
+		)
+	}
+
+		<script>
+		const copyIcon = '复制';
+		const copiedIcon = '已复制';
+
+		document.querySelectorAll('pre').forEach((pre) => {
+			const code = pre.querySelector('code');
+			if (!code || pre.querySelector('.copy-code')) return;
+
+			pre.classList.add('markdown-code-block-inner');
+			const figure = document.createElement('figure');
+			figure.className = 'markdown-code-block';
+			pre.parentNode?.insertBefore(figure, pre);
+			figure.append(pre);
+
+			const rawLang = pre.getAttribute('data-language') || [...code.classList]
+				.find((className) => className.startsWith('language-'))
+				?.replace('language-', '');
+			const lang = ({ js: 'javascript', ts: 'typescript', sh: 'bash', html: 'markup' })[rawLang || ''] || rawLang;
+
+			const tools = document.createElement('figcaption');
+			const label = document.createElement('span');
+			label.textContent = lang || 'TEXT';
+			const button = document.createElement('button');
+			button.className = 'markdown-code-copy';
+			button.type = 'button';
+			button.setAttribute('aria-label', 'Copy code');
+			button.setAttribute('title', 'Copy code');
+			button.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" width="15" height="15"><rect x="9" y="9" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"></rect><path d="M5 15V6.5A1.5 1.5 0 0 1 6.5 5H15" fill="none" stroke="currentColor" stroke-width="1.8"></path></svg>';
+			button.addEventListener('click', async () => {
+				await navigator.clipboard.writeText(code.textContent || '');
+				button.setAttribute('aria-label', copiedIcon);
+				button.setAttribute('title', copiedIcon);
+				button.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" width="15" height="15"><path d="m5 12 4 4 10-10" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
+				setTimeout(() => {
+					button.setAttribute('aria-label', 'Copy code');
+					button.setAttribute('title', 'Copy code');
+					button.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" width="15" height="15"><rect x="9" y="9" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"></rect><path d="M5 15V6.5A1.5 1.5 0 0 1 6.5 5H15" fill="none" stroke="currentColor" stroke-width="1.8"></path></svg>';
+				}, 1400);
+			});
+			tools.append(label, button);
+			figure.prepend(tools);
+		});
+
+		document.querySelectorAll('.markdown-content table').forEach((table) => {
+			if (table.parentElement?.classList.contains('markdown-table-wrap')) return;
+			const wrap = document.createElement('div');
+			wrap.className = 'markdown-table-wrap';
+			table.parentNode?.insertBefore(wrap, table);
+			wrap.append(table);
+		});
+
+		document.querySelectorAll('.markdown-content img').forEach((image) => {
+			image.closest('p')?.classList.add('markdown-figure');
+			image.addEventListener('click', () => {
+				const overlay = document.createElement('button');
+				overlay.className = 'image-preview';
+				overlay.type = 'button';
+				overlay.innerHTML = `<img src="${image.getAttribute('src')}" alt="${image.getAttribute('alt') || ''}">`;
+				overlay.addEventListener('click', () => overlay.remove());
+				document.body.append(overlay);
+			});
+		});
+
+		document.querySelectorAll('a[href^="#fn"], a[href^="#user-content-fn"]').forEach((anchor) => {
+			anchor.addEventListener('click', (event) => {
+				const href = anchor.getAttribute('href');
+				const targetId = href?.slice(1);
+				const target = targetId ? document.getElementById(targetId) : null;
+				if (!target) return;
+				event.preventDefault();
+				target.scrollIntoView({ block: 'start', behavior: 'smooth' });
+				if (target instanceof HTMLElement) {
+					target.tabIndex = -1;
+					target.focus({ preventScroll: true });
+				}
+			});
+		});
+
+		const toc = document.querySelector('.article-toc');
+		const links = [...document.querySelectorAll('.article-toc a')];
+		const headings = links
+			.map((link) => document.getElementById(link.getAttribute('href')?.slice(1) || ''))
+			.filter(Boolean);
+		const updateTocVisibility = () => {
+			const visible = window.scrollY > 320;
+			toc?.classList.toggle('is-visible', visible);
+			toc?.setAttribute('aria-hidden', String(!visible));
+		};
+		const observer = new IntersectionObserver(
+			(entries) => {
+				const visible = entries
+					.filter((entry) => entry.isIntersecting)
+					.sort((left, right) => left.boundingClientRect.top - right.boundingClientRect.top)[0];
+				if (!visible?.target?.id) return;
+				links.forEach((link) => link.classList.toggle('is-active', link.getAttribute('href') === `#${visible.target.id}`));
+			},
+			{ rootMargin: '-18% 0px -68% 0px', threshold: [0, 1] },
+		);
+		headings.forEach((heading) => observer.observe(heading));
+		updateTocVisibility();
+		window.addEventListener('scroll', updateTocVisibility, { passive: true });
+	</script>
+</BaseLayout>

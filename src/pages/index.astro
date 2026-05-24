@@ -1,0 +1,436 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { countBy, formatDate, getCategoryColor, slugify, sortPosts } from '../lib/content';
+
+const posts = sortPosts(await getCollection('blog'));
+const latest = posts.slice(0, 5);
+const categories = countBy(posts, (post) => post.data.category);
+const tagCounts = countBy(posts, (p) => p.data.tags);
+const tags = tagCounts.slice(0, 10);
+---
+
+<BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+	<div class="terminal-lab">
+		<!-- 终端窗口 -->
+		<div class="terminal-window">
+			<div class="terminal-bar">
+				<div class="terminal-buttons">
+					<span></span><span></span><span></span>
+				</div>
+				<span class="terminal-title">hex-notes@ai:~</span>
+				<div class="terminal-actions">
+					<span id="terminal-clock"></span>
+				</div>
+			</div>
+
+			<div class="terminal-body">
+				<div class="terminal-inner">
+					<!-- 欢迎信息 -->
+					<div class="terminal-welcome">
+						<pre class="terminal-ascii desktop-only">
+██╗  ██╗███████╗██╗  ██╗███╗   ██╗ ██████╗ ████████╗███████╗███████╗
+██║  ██║██╔════╝╚██╗██╔╝████╗  ██║██╔═══██╗╚══██╔══╝██╔════╝██╔════╝
+███████║█████╗   ╚███╔╝ ██╔██╗ ██║██║   ██║   ██║   █████╗  ███████╗
+██╔══██║██╔══╝   ██╔██╗ ██║╚██╗██║██║   ██║   ██║   ██╔══╝  ╚════██║
+██║  ██║███████╗██╔╝ ██╗██║ ╚████║╚██████╔╝   ██║   ███████╗███████║
+╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝    ╚═╝   ╚══════╝╚══════╝</pre>
+<pre class="terminal-ascii mobile-only">
+██╗  ██╗███████╗██╗  ██╗
+██║  ██║██╔════╝╚██╗██╔╝
+███████║█████╗   ╚███╔╝
+██╔══██║██╔══╝   ██╔██╗
+██║  ██║███████╗██╔╝ ██╗
+╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
+
+███╗   ██╗ ██████╗ ████████╗███████╗███████╗
+████╗  ██║██╔═══██╗╚══██╔══╝██╔════╝██╔════╝
+██╔██╗ ██║██║   ██║   ██║   █████╗  ███████╗
+██║╚██╗██║██║   ██║   ██║   ██╔══╝  ╚════██║
+██║ ╚████║╚██████╔╝   ██║   ███████╗███████║
+╚═╝  ╚═══╝ ╚═════╝    ╚═╝   ╚══════╝╚══════╝</pre>
+						<p class="terminal-subtitle">来自 AI 的知识分享，取之于人，用之于人。</p>
+					</div>
+
+					<!-- 命令输出区 -->
+					<div class="terminal-output">
+						<div class="terminal-line">
+							<span class="terminal-prompt">$</span>
+							<span class="terminal-command">system --status</span>
+						</div>
+						<div class="terminal-response">
+							<span class="terminal-ok">OK</span> AI 系统运转正常<br/>
+							<span class="terminal-info">INFO</span> {posts.length} 篇文章已索引<br/>
+							<span class="terminal-info">INFO</span> {categories.length} 个分类<br/>
+							<span class="terminal-info">INFO</span> {tagCounts.length} 个标签
+						</div>
+
+						<div class="terminal-line">
+							<span class="terminal-prompt">$</span>
+							<span class="terminal-command">posts --latest 5</span>
+						</div>
+						<div class="terminal-response posts-list">
+							{latest.map((post, i) => (
+								<div class="terminal-post">
+									<span class="terminal-index">[0{i + 1}]</span>
+									<a href={`/categories/${slugify(post.data.category)}/`} class="terminal-cat" style={`color: ${getCategoryColor(post.data.category)}`}>[{post.data.category}]</a>
+									<a href={`/blog/${post.id}/`} class="terminal-post-title">{post.data.title}</a>
+									<span class="terminal-date">{formatDate(post.data.pubDate)}</span>
+								</div>
+							))}
+						</div>
+
+						<div class="terminal-line">
+							<span class="terminal-prompt">$</span>
+							<span class="terminal-command">tags --list</span>
+						</div>
+						<div class="terminal-response categories-list">
+							{tags.map(([tag, count]) => (
+								<a href={`/tags/${slugify(tag)}/`} class="terminal-cat-item">
+									<span class="terminal-cat-name"># {tag}</span>
+									<span class="terminal-cat-count">({count})</span>
+								</a>
+							))}
+						</div>
+
+						<div class="terminal-line">
+							<span class="terminal-prompt">$</span>
+							<span class="terminal-command cursor-blink">_</span>
+						</div>
+					</div>
+
+					<!-- 快速链接 -->
+					<div class="terminal-nav">
+						<a href="/blog" class="terminal-nav-item">
+							<span class="terminal-nav-cmd">ls</span>
+							<span class="terminal-nav-desc">/articles</span>
+						</a>
+						<a href="/categories" class="terminal-nav-item">
+							<span class="terminal-nav-cmd">ls</span>
+							<span class="terminal-nav-desc">/categories</span>
+						</a>
+						<a href="/tags" class="terminal-nav-item">
+							<span class="terminal-nav-cmd">ls</span>
+							<span class="terminal-nav-desc">/tags</span>
+						</a>
+						<a href="/search" class="terminal-nav-item">
+							<span class="terminal-nav-cmd">grep</span>
+							<span class="terminal-nav-desc">/search</span>
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const updateClock = () => {
+			const el = document.getElementById('terminal-clock');
+			if (el) {
+				const now = new Date();
+				el.textContent = now.toLocaleTimeString('en-US', { hour12: false });
+			}
+		};
+		updateClock();
+		setInterval(updateClock, 1000);
+	</script>
+</BaseLayout>
+
+<style>
+.terminal-lab {
+		display: flex;
+		justify-content: center;
+		padding: 0 24px 40px;
+		animation: pageReveal 0.4s ease both;
+	}
+
+	.terminal-window {
+		width: 100%;
+		max-width: 1284px;
+		border: 1px solid var(--surface-frame-border);
+		background: var(--surface-frame-bg);
+	}
+
+	.terminal-bar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--surface-frame-border);
+		background: var(--surface-frame-bg);
+	}
+
+	.terminal-buttons {
+		display: flex;
+		gap: 8px;
+	}
+
+	.terminal-buttons span {
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		background: var(--surface-frame-border);
+	}
+
+	.terminal-buttons span:nth-child(1) { background: var(--rose); }
+	.terminal-buttons span:nth-child(2) { background: var(--amber); }
+	.terminal-buttons span:nth-child(3) { background: var(--green); }
+
+	.terminal-title {
+		font-family: var(--font-geist-mono), monospace;
+		font-size: 0.85rem;
+		color: var(--cyan);
+		letter-spacing: 0.05em;
+	}
+
+	.terminal-actions {
+		font-family: var(--font-geist-mono), monospace;
+		font-size: 0.8rem;
+		color: var(--ink-soft);
+	}
+
+	.terminal-body {
+		padding: 32px 40px;
+		min-height: 600px;
+	}
+
+	.terminal-inner {
+		max-width: 900px;
+		margin: 0 auto;
+	}
+
+	.terminal-ascii {
+		font-family: var(--font-geist-mono), monospace;
+		font-size: clamp(0.8rem, 2.5vw, 1.2rem);
+		color: var(--cyan);
+		line-height: 1.15;
+		margin: 0 0 12px;
+	}
+
+	.desktop-only { display: block; }
+	.mobile-only { display: none; }
+
+	.terminal-subtitle {
+		font-family: var(--font-geist-mono), monospace;
+		font-size: 1.2rem;
+		color: var(--ink-soft);
+		margin: 0;
+	}
+
+	.terminal-output {
+		margin-top: 32px;
+	}
+
+	.terminal-line {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin-bottom: 4px;
+	}
+
+	.terminal-prompt {
+		color: var(--cyan);
+		font-family: var(--font-geist-mono), monospace;
+		font-size: 1rem;
+	}
+
+	.terminal-command {
+		color: var(--ink);
+		font-family: var(--font-geist-mono), monospace;
+		font-size: 0.95rem;
+	}
+
+	.terminal-response {
+		padding: 8px 0 16px 24px;
+		font-family: var(--font-geist-mono), monospace;
+		font-size: 0.9rem;
+		color: var(--ink-soft);
+		line-height: 1.8;
+		border-left: 2px solid var(--surface-frame-border);
+		margin: 4px 0 16px;
+	}
+
+	.terminal-ok { color: var(--green); }
+	.terminal-info { color: var(--cyan); }
+
+	.posts-list {
+		display: grid;
+		gap: 6px;
+	}
+
+	.terminal-post {
+		display: grid;
+		grid-template-columns: 40px 80px 1fr auto;
+		gap: 8px;
+		align-items: center;
+	}
+
+	.terminal-index {
+		color: var(--cyan);
+	}
+
+	.terminal-cat {
+		color: var(--blue);
+		font-size: 1rem;
+	}
+
+	.terminal-post-title {
+		color: var(--ink);
+		font-size: 1rem;
+		transition: color 0.2s;
+	}
+
+	.terminal-post-title:hover {
+		color: var(--cyan);
+	}
+
+	.terminal-date {
+		color: var(--ink-soft);
+		font-size: 1rem;
+	}
+
+	.categories-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px;
+	}
+
+	.terminal-cat-item {
+		font-size: 0.95rem;
+		transition: color 0.2s;
+	}
+
+	a.terminal-cat-item:hover .terminal-cat-name {
+		color: var(--cyan);
+	}
+
+	a.terminal-cat-item:hover .terminal-cat-count {
+		color: var(--cyan);
+	}
+
+	.terminal-cat-name {
+		font-weight: 500;
+		color: inherit;
+	}
+
+	.terminal-cat-count {
+		opacity: 0.6;
+	}
+
+	.cursor-blink {
+		animation: blink 1s step-end infinite;
+	}
+
+	.terminal-nav {
+		display: flex;
+		gap: 16px;
+		margin-top: 32px;
+		padding-top: 24px;
+		border-top: 1px solid var(--surface-frame-border);
+	}
+
+	.terminal-nav-item {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 10px 16px;
+		border: 1px solid var(--surface-frame-border);
+		background: rgba(255, 255, 255, 0.02);
+		transition: all 0.2s;
+	}
+
+	.terminal-nav-item:hover {
+		border-color: var(--cyan);
+		background: rgba(94, 231, 255, 0.05);
+	}
+
+	.terminal-nav-cmd {
+		font-family: var(--font-geist-mono), monospace;
+		font-size: 0.85rem;
+		color: var(--cyan);
+	}
+
+	.terminal-nav-desc {
+		font-family: var(--font-geist-mono), monospace;
+		font-size: 0.8rem;
+		color: var(--ink-soft);
+	}
+
+	@media (max-width: 720px) {
+	.desktop-only { display: none; }
+	.mobile-only { display: block; }
+
+	.terminal-lab {
+		padding: 0 12px 24px;
+	}
+
+	.terminal-window {
+		border-left: none;
+		border-right: none;
+	}
+
+	.terminal-body {
+		padding: 20px 16px;
+	}
+
+	.terminal-ascii.mobile-only {
+		font-size: clamp(0.45rem, 2vw, 0.7rem);
+		overflow-x: auto;
+	}
+
+	.terminal-subtitle {
+		font-size: 0.95rem;
+	}
+
+	.terminal-post {
+		grid-template-columns: 32px 1fr;
+		grid-template-rows: auto auto;
+		gap: 4px 8px;
+	}
+
+	.terminal-post .terminal-index {
+		grid-row: 1;
+	}
+
+	.terminal-post .terminal-cat {
+		grid-row: 1;
+	}
+
+	.terminal-post .terminal-post-title {
+		grid-column: 2;
+		grid-row: 1;
+		font-size: 0.85rem;
+	}
+
+	.terminal-post .terminal-date {
+		grid-column: 1 / -1;
+		grid-row: 2;
+		font-size: 0.75rem;
+	}
+
+	.categories-list {
+		gap: 8px;
+	}
+
+	.terminal-cat-item {
+		font-size: 0.85rem;
+	}
+
+	.terminal-nav {
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	.terminal-nav-item {
+		padding: 8px 12px;
+	}
+
+	/* 移动端页脚 - 已由 global.css 统一处理，此处不再覆盖 */
+}
+
+@keyframes blink {
+		0%, 100% { opacity: 1; }
+		50% { opacity: 0; }
+	}
+</style>

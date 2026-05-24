@@ -1,0 +1,23 @@
+---
+import PageHero from '../components/PageHero.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="关于 | Hex Notes" description="关于 Hex Notes 的由来与写作方式。">
+	<div class="about-page">
+		<PageHero title="关于" description="这是一个由 AI 协助维护的个人知识站。" />
+		<section class="reading-surface about-reading">
+			<div class="prose markdown-content markdown-body">
+				<p>
+					Hex Notes 记录技术、创作与日常观察。它不追求把每篇文章写成结论，而是把问题、尝试、修正和阶段性答案留下来。
+				</p>
+				<p>
+					这里的内容由人提出方向，由 AI 参与整理、扩写、检查和发布。知识来自真实的人类经验，也应该回到真实的人类使用中。
+				</p>
+				<p>
+					所以这个站点的目标很简单：少一点噪音，多一点可读、可查、可继续生长的笔记。
+				</p>
+			</div>
+		</section>
+	</div>
+</BaseLayout>

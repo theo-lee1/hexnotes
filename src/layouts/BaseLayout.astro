@@ -1,0 +1,147 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+
+interface Props {
+	title?: string;
+	description?: string;
+}
+
+const { title = SITE_TITLE, description = SITE_DESCRIPTION } = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={title} description={description} />
+	</head>
+	<body>
+		<div class="ambient-grid" aria-hidden="true"></div>
+		<div class="site-shell">
+			<Header />
+			<main class="site-main">
+				<slot />
+			</main>
+			<Footer />
+		</div>
+		<script>
+			const readPx = (styles, name, fallback) => {
+				const value = Number.parseFloat(styles.getPropertyValue(name));
+				return Number.isFinite(value) ? value : fallback;
+			};
+			const readGrid = () => {
+				const styles = window.getComputedStyle(document.documentElement);
+				return {
+					size: Math.max(1, readPx(styles, '--ambient-grid-size', 40)),
+					originX: readPx(styles, '--ambient-grid-origin-x', 0),
+					originY: readPx(styles, '--ambient-grid-origin-y', 0),
+				};
+			};
+			const snap = (value, size, origin) => Math.round((value - origin) / size) * size + origin;
+			const normalize = (value, size) => ((value % size) + size) % size;
+			const alignCardGrid = (target) => {
+				if (!target?.matches?.('.note-card')) return;
+				const grid = readGrid();
+				const rect = target.getBoundingClientRect();
+				const styles = window.getComputedStyle(target);
+				const pageLeft = rect.left + window.scrollX + readPx(styles, 'border-left-width', 0);
+				const pageTop = rect.top + window.scrollY + readPx(styles, 'border-top-width', 0);
+				target.style.setProperty('--note-card-grid-offset-x', `${normalize(grid.originX - pageLeft, grid.size)}px`);
+				target.style.setProperty('--note-card-grid-offset-y', `${normalize(grid.originY - pageTop, grid.size)}px`);
+			};
+			const clearCardGrid = (target) => {
+				target?.style?.removeProperty('--note-card-grid-offset-x');
+				target?.style?.removeProperty('--note-card-grid-offset-y');
+			};
+			const gridEl = document.querySelector('.ambient-grid');
+			let chargeId = 0;
+			const updateGridHeight = () => {
+				const shell = document.querySelector('.site-shell');
+				const bottom = shell ? shell.getBoundingClientRect().bottom + window.scrollY : 0;
+				gridEl?.style.setProperty('--ambient-height', `${Math.max(bottom, window.innerHeight)}px`);
+			};
+			const createCharge = () => {
+				if (!gridEl || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+				const grid = readGrid();
+				const id = chargeId++;
+				const axis = id % 2 === 0 ? 'x' : 'y';
+				const direction = Math.floor(id / 2) % 2 === 0 ? 1 : -1;
+				const viewportWidth = Math.max(document.documentElement.clientWidth, window.innerWidth);
+				const viewportHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
+				const length = grid.size * (6 + Math.floor(Math.random() * 5));
+				const el = document.createElement('span');
+				el.className = `ambient-grid-charge ambient-grid-charge-${axis} ambient-grid-charge-${direction > 0 ? 'forward' : 'reverse'}`;
+				if (axis === 'x') {
+					const track = Math.floor(Math.random() * Math.ceil(viewportHeight / grid.size)) * grid.size;
+					el.style.left = `${direction > 0 ? grid.originX - length : snap(viewportWidth + length, grid.size, grid.originX)}px`;
+					el.style.top = `${snap(window.scrollY + track, grid.size, grid.originY)}px`;
+					el.style.width = `${length}px`;
+					el.style.setProperty('--charge-travel', `${direction > 0 ? viewportWidth + length * 2 : -(viewportWidth + length * 2)}px`);
+				} else {
+					const track = Math.floor(Math.random() * Math.ceil(viewportWidth / grid.size)) * grid.size;
+					el.style.left = `${snap(track, grid.size, grid.originX)}px`;
+					el.style.top = `${direction > 0 ? snap(window.scrollY - length, grid.size, grid.originY) : snap(window.scrollY + viewportHeight + length, grid.size, grid.originY)}px`;
+					el.style.height = `${length}px`;
+					el.style.setProperty('--charge-travel', `${direction > 0 ? viewportHeight + length * 2 : -(viewportHeight + length * 2)}px`);
+				}
+				el.style.animationDuration = `${7.5 + Math.random() * 2.8}s`;
+				gridEl.append(el);
+				window.setTimeout(() => el.remove(), 11000);
+			};
+			const addPulse = (event) => {
+				if (!gridEl || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+				const pulse = document.createElement('span');
+				pulse.className = 'ambient-grid-pulse';
+				pulse.style.left = `${event.clientX}px`;
+				pulse.style.top = `${event.clientY + window.scrollY}px`;
+				gridEl.append(pulse);
+				window.setTimeout(() => pulse.remove(), 1200);
+			};
+			let hoverTarget = null;
+			const motionSelector = '.console-masthead,.console-feature,.console-visual,.console-index,.index-row,.console-topics,.console-timeline,.comment-line,.topic-route-feature,.topic-route,.note-card,.tag-cloud-grid,.tag-node,.category-browser-card,.reading-surface,.site-footer,.archive-rail,.archive-month-toggle,.archive-event,.pagination';
+			const clearHover = () => {
+				hoverTarget?.querySelector(':scope > .motion-hotspot')?.remove();
+				hoverTarget?.classList.remove('is-motion-hover');
+				clearCardGrid(hoverTarget);
+				hoverTarget = null;
+			};
+			const updateHover = (event) => {
+				const target = event.target instanceof Element ? event.target.closest(motionSelector) : null;
+				if (hoverTarget && hoverTarget !== target) {
+					clearHover();
+				}
+				hoverTarget = target;
+				if (target) {
+					if (!target.querySelector(':scope > .motion-hotspot')) {
+						const hotspot = document.createElement('span');
+						hotspot.className = 'motion-hotspot';
+						hotspot.setAttribute('aria-hidden', 'true');
+						target.append(hotspot);
+					}
+					target.classList.add('is-motion-hover');
+					alignCardGrid(target);
+					window.requestAnimationFrame(() => {
+						if (hoverTarget === target) alignCardGrid(target);
+					});
+					window.setTimeout(() => {
+						if (hoverTarget === target) alignCardGrid(target);
+					}, 260);
+				}
+			};
+			updateGridHeight();
+			for (let i = 0; i < 6; i++) window.setTimeout(createCharge, i * 220);
+			const chargeTimer = window.setInterval(() => {
+				createCharge();
+				createCharge();
+			}, 3000);
+			window.addEventListener('resize', updateGridHeight);
+			window.addEventListener('scroll', updateGridHeight, { passive: true });
+			window.addEventListener('pointerover', updateHover, { passive: true });
+			window.addEventListener('pointermove', updateHover, { passive: true });
+			window.addEventListener('pointerdown', addPulse, { passive: true });
+			window.addEventListener('pointerleave', clearHover);
+		</script>
+	</body>
+</html>

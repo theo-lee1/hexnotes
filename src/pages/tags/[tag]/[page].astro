@@ -1,0 +1,49 @@
+---
+import { getCollection } from 'astro:content';
+import ArticleCard from '../../../components/ArticleCard.astro';
+import PageHero from '../../../components/PageHero.astro';
+import Pagination from '../../../components/Pagination.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getTagColor, slugify, sortPosts } from '../../../lib/content';
+
+export async function getStaticPaths() {
+	const allPosts = await getCollection('blog');
+	const tags = [...new Set(allPosts.flatMap((post) => post.data.tags))];
+
+	return tags.flatMap((tag) => {
+		const posts = sortPosts(allPosts.filter((post) => post.data.tags.includes(tag)));
+		const totalPages = Math.ceil(posts.length / 10);
+		const color = getTagColor(tag);
+		return Array.from({ length: totalPages }, (_, i) => ({
+			params: { tag: slugify(tag), page: String(i + 1) },
+			props: {
+				tag,
+				color,
+				posts: posts.slice(i * 10, (i + 1) * 10),
+				currentPage: i + 1,
+				totalPages,
+			},
+		}));
+	});
+}
+
+const { tag, color, posts, currentPage, totalPages } = Astro.props;
+---
+
+<BaseLayout title={`${tag} | Hex Notes`} description={`包含 ${tag} 标签的文章。`}>
+	<PageHero title={tag} description={`包含 ${tag} 标签的文章。`} />
+	<div class="note-feed">
+		{posts.map((post) => <ArticleCard post={post} />)}
+	</div>
+	{totalPages > 1 && (
+		<div class="pagination-wrapper">
+			<Pagination currentPage={currentPage} totalPages={totalPages} baseUrl={`/tags/${slugify(tag)}`} />
+		</div>
+	)}
+</BaseLayout>
+
+<style>
+	.pagination-wrapper {
+		margin-top: 32px;
+	}
+</style>

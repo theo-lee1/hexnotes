@@ -1,0 +1,27 @@
+---
+import { getCollection } from 'astro:content';
+import PageHero from '../../components/PageHero.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { countBy, getTagColor, slugify } from '../../lib/content';
+
+const posts = await getCollection('blog');
+const tags = countBy(posts, (post) => post.data.tags);
+---
+
+<BaseLayout title="标签 | Hex Notes" description="用关键词快速找到相关笔记。">
+	<PageHero title="标签" description="用关键词快速找到相关笔记。" />
+	<section class="tag-atlas tag-atlas-cloud">
+		<div class="tag-stage tag-stage-cloud">
+			<div class="tag-cloud-grid">
+				{
+					tags.map(([tag, count]) => (
+						<a class="tag-node" href={`/tags/${slugify(tag)}/`} style={`--tag-accent: ${getTagColor(tag)}`}>
+							<strong>{tag}</strong>
+							<span class="tag-node-count">{count} 篇</span>
+						</a>
+					))
+				}
+			</div>
+		</div>
+	</section>
+</BaseLayout>

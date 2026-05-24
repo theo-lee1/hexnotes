@@ -1,0 +1,279 @@
+---
+interface Props {
+  currentPage: number;
+  totalPages: number;
+  baseUrl?: string;
+}
+
+const { currentPage, totalPages, baseUrl = '/blog' } = Astro.props;
+
+function getPages(current: number, total: number): (number | '...')[] {
+  if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1);
+
+  // 前4页：1 2 3 4 5 ... total
+  if (current <= 4) {
+    const pages: (number | '...')[] = [1, 2, 3, 4, 5];
+    if (total > 6) pages.push('...');
+    pages.push(total);
+    return pages;
+  }
+
+  // 后4页：1 ... total-4 total-3 total-2 total-1 total
+  if (current >= total - 3) {
+    const pages: (number | '...')[] = [1];
+    if (total > 6) pages.push('...');
+    for (let i = total - 4; i <= total; i++) pages.push(i);
+    return pages;
+  }
+
+  // 中间：1 ... current-1 current current+1 ... total
+  const pages: (number | '...')[] = [1, '...', current - 1, current, current + 1, '...', total];
+  return pages;
+}
+
+const pages = getPages(currentPage, totalPages);
+const prevUrl = currentPage <= 2 ? baseUrl : `${baseUrl}/${currentPage - 1}`;
+const nextUrl = `${baseUrl}/${currentPage + 1}`;
+const getPageUrl = (page: number) => page === 1 ? baseUrl : `${baseUrl}/${page}`;
+---
+
+{totalPages > 1 && (
+  <nav class="pagination" aria-label="分页导航">
+    <span class="pagination-summary">
+      第 {currentPage} / {totalPages} 页，共 {totalPages} 页
+    </span>
+
+    <div class="pagination-links">
+      {/* 上一页 */}
+      {currentPage > 1 ? (
+        <a href={prevUrl} class="pagination-step" aria-label="上一页">
+          <span class="step-text">上一页</span>
+          <span class="step-icon">◀</span>
+        </a>
+      ) : (
+        <span class="pagination-step is-disabled" aria-disabled="true">
+          <span class="step-text">上一页</span>
+          <span class="step-icon">◀</span>
+        </span>
+      )}
+
+      {/* 页码 */}
+      {pages.map((page) => (
+        page === '...' ? (
+          <span class="is-ellipsis" aria-hidden="true">...</span>
+        ) : page === currentPage ? (
+          <span class="is-active" aria-current="page">{page}</span>
+        ) : (
+          <a href={getPageUrl(page)} class="pagination-page">{page}</a>
+        )
+      ))}
+
+      {/* 下一页 */}
+      {currentPage < totalPages ? (
+        <a href={nextUrl} class="pagination-step" aria-label="下一页">
+          <span class="step-text">下一页</span>
+          <span class="step-icon">▶</span>
+        </a>
+      ) : (
+        <span class="pagination-step is-disabled" aria-disabled="true">
+          <span class="step-text">下一页</span>
+          <span class="step-icon">▶</span>
+        </span>
+      )}
+    </div>
+  </nav>
+)}
+
+<style>
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid var(--surface-frame-border);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.028), rgba(255, 255, 255, 0.012)),
+    rgba(255, 255, 255, 0.014);
+  padding: 14px 16px;
+}
+
+.pagination-summary {
+  color: var(--ink-soft);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.pagination-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-links a,
+.pagination-links button {
+  display: inline-flex;
+  min-width: 38px;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--surface-frame-border);
+  background: rgba(255, 255, 255, 0.024);
+  padding: 8px 11px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-size: 0.86rem;
+  font-family: var(--font-geist-mono), monospace;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.pagination-links a:hover {
+  border-color: rgba(124, 183, 255, 0.28);
+  background: rgba(124, 183, 255, 0.08);
+  color: var(--ink);
+}
+
+.pagination-links .is-ellipsis {
+  display: inline-flex;
+  min-width: 38px;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-soft);
+  font-size: 0.86rem;
+  user-select: none;
+}
+
+.pagination-page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0 !important;
+}
+
+.pagination-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  min-width: 64px;
+  padding-inline: 12px;
+  border: 1px solid var(--surface-frame-border);
+  font-size: 0.86rem;
+  font-family: var(--font-geist-mono), monospace;
+}
+
+.is-disabled {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  min-width: 64px;
+  padding-inline: 12px;
+  border: 1px solid var(--surface-frame-border);
+  font-size: 0.86rem;
+  font-family: var(--font-geist-mono), monospace;
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.is-active {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(124, 183, 255, 0.5);
+  background: rgba(124, 183, 255, 0.1);
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-family: var(--font-geist-mono), monospace;
+}
+
+@media (max-width: 720px) {
+	.pagination {
+		flex-direction: column;
+		gap: 12px;
+		padding: 12px;
+	}
+
+	.pagination-links {
+		justify-content: center;
+		gap: 4px;
+	}
+
+	.pagination-summary {
+		text-align: center;
+	}
+
+	.pagination-links a,
+	.pagination-links button,
+	.pagination-step,
+	.is-disabled,
+	.pagination-page,
+	.is-active,
+	.is-ellipsis {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: unset;
+		min-width: unset;
+		height: 28px;
+		font-size: 0.75rem;
+	}
+
+	.pagination-links a,
+	.pagination-links button {
+		min-width: 28px;
+		padding: 0;
+	}
+
+	.pagination-step {
+		min-width: 32px;
+		padding-inline: 0;
+		border: 1px solid var(--surface-frame-border);
+	}
+
+	.is-disabled {
+		min-width: 32px;
+		padding-inline: 0;
+		border: 1px solid var(--surface-frame-border);
+		opacity: 0.4;
+	}
+
+	.is-active,
+	.pagination-page {
+		width: 28px;
+		min-width: 28px;
+		padding: 0;
+	}
+
+	.is-ellipsis {
+		min-width: 28px;
+	}
+
+	.step-text {
+		display: none;
+	}
+
+	.step-icon {
+		display: inline;
+	}
+}
+
+@media (min-width: 721px) {
+	.step-text {
+		display: inline;
+	}
+
+	.step-icon {
+		display: none;
+	}
+}
+</style>
