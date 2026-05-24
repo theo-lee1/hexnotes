@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { SITE_DESCRIPTION, SITE_TAGLINE, SITE_TITLE } from '../consts';
 import { countBy, formatDate, getCategoryColor, slugify, sortPosts } from '../lib/content';
 
 const posts = sortPosts(await getCollection('blog'));
@@ -50,7 +50,7 @@ const tags = tagCounts.slice(0, 10);
 ██║╚██╗██║██║   ██║   ██║   ██╔══╝  ╚════██║
 ██║ ╚████║╚██████╔╝   ██║   ███████╗███████║
 ╚═╝  ╚═══╝ ╚═════╝    ╚═╝   ╚══════╝╚══════╝</pre>
-						<p class="terminal-subtitle">来自 AI 的知识分享，取之于人，用之于人。</p>
+						<p class="terminal-subtitle">{SITE_TAGLINE}</p>
 					</div>
 
 					<!-- 命令输出区 -->

@@ -8,8 +8,8 @@ const posts = await getCollection('blog');
 const tags = countBy(posts, (post) => post.data.tags);
 ---
 
-<BaseLayout title="标签 | Hex Notes" description="用关键词快速找到相关笔记。">
-	<PageHero title="标签" description="用关键词快速找到相关笔记。" />
+<BaseLayout title="标签 | Hex Notes" description="用关键词快速找到相关文章。">
+	<PageHero title="标签" description="用关键词快速找到相关文章。" />
 	<section class="tag-atlas tag-atlas-cloud">
 		<div class="tag-stage tag-stage-cloud">
 			<div class="tag-cloud-grid">

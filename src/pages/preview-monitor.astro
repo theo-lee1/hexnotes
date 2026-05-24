@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { SITE_DESCRIPTION, SITE_TAGLINE, SITE_TITLE } from '../consts';
 import { countBy, formatDate, slugify, sortPosts } from '../lib/content';
 
 const posts = sortPosts(await getCollection('blog'));
@@ -21,7 +21,7 @@ const totalTags = [...new Set(posts.flatMap((p) => p.data.tags))].length;
 				<span class="monitor-dot"></span>
 				<div class="monitor-title-group">
 					<strong>{SITE_TITLE}</strong>
-					<span class="monitor-subtitle">来自 AI 的知识分享，取之于人，用之于人。</span>
+					<span class="monitor-subtitle">{SITE_TAGLINE}</span>
 				</div>
 			</div>
 			<div class="monitor-status">
