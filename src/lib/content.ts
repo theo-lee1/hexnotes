@@ -6,28 +6,28 @@ export type BlogPost = CollectionEntry<'blog'>;
 
 const CATEGORY_COLORS_PATH = path.resolve('./category-colors.json');
 
-// 20个鲜艳互不相近的颜色池
+// 20个分类颜色池 - 精选风格
 export const COLOR_POOL = [
-	'#E53935', // 红
-	'#FB8C00', // 橙
-	'#FDD835', // 明黄
-	'#AEEA00', // 黄绿
-	'#43A047', // 绿
-	'#00BFA5', // 青绿
-	'#00B0FF', // 天蓝
-	'#2962FF', // 蓝
-	'#7C4DFF', // 紫蓝
-	'#D500F9', // 品红
-	'#F50057', // 玫红
-	'#795548', // 棕色
-	'#5D4037', // 深棕
-	'#00695C', // 深青
-	'#1565C0', // 靛蓝
-	'#00897B', // 蓝绿
-	'#C62828', // 深红
-	'#E64A19', // 橙红
-	'#AD1457', // 深粉
-	'#6A1B9A', // 紫色
+	'#FF5C5C', // 红
+	'#FF9F43', // 橙
+	'#84CC16', // 青柠
+	'#4ADE80', // 绿
+	'#22D3EE', // 湖蓝
+	'#60A5FA', // 蓝
+	'#C084FC', // 洋红
+	'#FB7185', // 珊瑚
+	'#F97316', // 深橙
+	'#FF2BD6', // 品红
+	'#FF003C', // 深红
+	'#DDDDDD', // 浅灰
+	'#2979FF', // 天蓝
+	'#FF3300', // 橙红
+	'#C1FF72', // 浅绿
+	'#FFF000', // 亮黄
+	'#FF007A', // 深粉
+	'#8000FF', // 紫
+	'#F8B4FF', // 浅粉
+	'#FF4D00', // 橙红
 ];
 
 function loadCategoryColors(): Record<string, string> {

@@ -169,11 +169,11 @@ ls -la
 
 ### 普通图片
 
-![替代文本](https://picsum.photos/400/200)
+![替代文本](/placeholder-1.jpg)
 
 ### 带标题的图片
 
-![风景图片](https://picsum.photos/600/300 "美丽的风景")
+![风景图片](/placeholder-2.jpg "美丽的风景")
 
 ---
 
