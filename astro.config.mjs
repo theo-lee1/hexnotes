@@ -4,6 +4,7 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import { defineConfig, fontProviders } from 'astro/config';
 import remarkGfm from 'remark-gfm';
+import { remarkSuperscriptSubscript } from './src/lib/remark-superscript-subscript.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -65,9 +66,9 @@ export default defineConfig({
 	site,
 	integrations: [mdx(), sitemap(), categoryCleanupIntegration()],
 	markdown: {
-		remarkPlugins: [remarkGfm],
+		remarkPlugins: [[remarkGfm, { singleTilde: false }], remarkSuperscriptSubscript],
 		shikiConfig: {
-			theme: 'github-dark',
+			theme: 'catppuccin-mocha',
 		},
 	},
 	fonts: [

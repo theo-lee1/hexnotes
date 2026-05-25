@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
 import { formatDate, getCategoryColor, slugify } from '../lib/content';
+import { SITE_AUTHOR, SITE_TITLE } from '../consts';
 
 interface Props {
 	post: CollectionEntry<'blog'>;
@@ -17,9 +18,37 @@ interface MarkdownHeading {
 const { post, headings } = Astro.props;
 const toc = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
 const accent = getCategoryColor(post.data.category);
+const postUrl = new URL(`/blog/${post.id}/`, Astro.site);
+const structuredData = {
+	'@context': 'https://schema.org',
+	'@type': 'BlogPosting',
+	headline: post.data.title,
+	description: post.data.description,
+	datePublished: post.data.pubDate.toISOString(),
+	dateModified: (post.data.updatedDate ?? post.data.pubDate).toISOString(),
+	mainEntityOfPage: postUrl.toString(),
+	author: {
+		'@type': 'Person',
+		name: SITE_AUTHOR,
+	},
+	publisher: {
+		'@type': 'Organization',
+		name: SITE_TITLE,
+	},
+	keywords: post.data.tags,
+	articleSection: post.data.category,
+};
 ---
 
-<BaseLayout title={`${post.data.title} | Hex Notes`} description={post.data.description}>
+<BaseLayout
+	title={`${post.data.title} | Hex Notes`}
+	description={post.data.description}
+	type="article"
+	publishedTime={post.data.pubDate}
+	modifiedTime={post.data.updatedDate ?? post.data.pubDate}
+	tags={post.data.tags}
+	structuredData={structuredData}
+>
 	<article class="reading-page">
 		<header class="reading-header" style={`--note-accent: ${accent}`}>
 			<div class="reading-header-meta">
@@ -27,13 +56,6 @@ const accent = getCategoryColor(post.data.category);
 					{post.data.category}
 				</a>
 				<time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
-				<span class="reading-header-views">
-					<svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14">
-						<path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" fill="none" stroke="currentColor" stroke-width="1.8" />
-						<circle cx="12" cy="12" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8" />
-					</svg>
-					{(post.body ?? '').length} 字
-				</span>
 			</div>
 			<h1>{post.data.title}</h1>
 			<p>{post.data.description}</p>

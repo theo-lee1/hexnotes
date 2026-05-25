@@ -1841,16 +1841,6 @@ select option {
   color: var(--ink);
 }
 
-.reading-header-views svg {
-  flex: 0 0 auto;
-}
-
-.note-card-views {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
 .note-card-title {
   position: relative;
   z-index: 1;
@@ -2698,16 +2688,11 @@ select option {
   color: var(--ink);
 }
 
-.note-card .note-card-meta time,
-.note-card .note-card-views {
+.note-card .note-card-meta time {
   flex: 0 0 auto;
   color: rgba(226, 232, 240, 0.58);
   line-height: 1;
   white-space: nowrap;
-}
-
-.note-card .note-card-views svg {
-  flex: 0 0 auto;
 }
 
 .note-card .note-card-title {
@@ -3187,12 +3172,37 @@ select option {
 }
 
 .markdown-content em {
-  color: var(--paper-soft);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-style: oblique 12deg;
+  font-synthesis-style: auto;
 }
 
 .markdown-content del {
   color: var(--muted);
   text-decoration-color: rgba(124, 183, 255, 0.42);
+}
+
+.markdown-content mark {
+  padding: 0 0.08em 0.04em;
+  background: linear-gradient(to top, rgba(244, 184, 96, 0.34) 0 42%, transparent 42%);
+  color: var(--ink);
+}
+
+.markdown-content sup,
+.markdown-content sub {
+  position: relative;
+  font-size: 0.72em;
+  line-height: 0;
+  color: inherit;
+}
+
+.markdown-content sup {
+  top: -0.45em;
+}
+
+.markdown-content sub {
+  bottom: -0.18em;
 }
 
 .markdown-content ul,

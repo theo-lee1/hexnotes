@@ -1,63 +1,82 @@
 import { visit } from 'unist-util-visit';
 
-/**
- * Custom remark plugin to handle superscript (^text^) and subscript (~text~)
- * Works alongside remark-gfm without conflicts
- */
+const INLINE_MARKERS = [
+	{ marker: '==', type: 'highlight', hName: 'mark' },
+	{ marker: '^', type: 'superscript', hName: 'sup' },
+	{ marker: '~', type: 'subscript', hName: 'sub' },
+];
+
+function findNextMarker(value, start) {
+	let next = null;
+	for (const marker of INLINE_MARKERS) {
+		const index = value.indexOf(marker.marker, start);
+		if (index === -1) continue;
+		if (!next || index < next.index || (index === next.index && marker.marker.length > next.marker.marker.length)) {
+			next = { index, marker };
+		}
+	}
+	return next;
+}
+
+function parseExtendedInline(value) {
+	const nodes = [];
+	let cursor = 0;
+
+	while (cursor < value.length) {
+		const next = findNextMarker(value, cursor);
+		if (!next) {
+			nodes.push({ type: 'text', value: value.slice(cursor) });
+			break;
+		}
+
+		const { marker } = next;
+		const markerText = marker.marker;
+		const contentStart = next.index + markerText.length;
+		const close = value.indexOf(markerText, contentStart);
+
+		if (close === -1) {
+			nodes.push({ type: 'text', value: value.slice(cursor) });
+			break;
+		}
+
+		const content = value.slice(contentStart, close);
+		if (!content.trim()) {
+			nodes.push({ type: 'text', value: value.slice(cursor, close + markerText.length) });
+			cursor = close + markerText.length;
+			continue;
+		}
+
+		if (next.index > cursor) {
+			nodes.push({ type: 'text', value: value.slice(cursor, next.index) });
+		}
+
+		nodes.push({
+			type: marker.type,
+			data: { hName: marker.hName },
+			children: [{ type: 'text', value: content }],
+		});
+
+		cursor = close + markerText.length;
+	}
+
+	return nodes;
+}
+
 export function remarkSuperscriptSubscript() {
 	return (tree) => {
 		const changes = [];
 
 		visit(tree, 'text', (node, index, parent) => {
 			if (!node.value || !parent || index === undefined) return;
+			if (!INLINE_MARKERS.some(({ marker }) => node.value.includes(marker))) return;
+			if (node.value.includes('~~')) return;
 
-			const value = node.value;
-
-			// Process superscript ^text^
-			if (value.includes('^') && !value.includes('^^')) {
-				const parts = value.split('^');
-				// Need odd number of parts for valid superscript (3+ parts = 1 pair, 5 = 2 pairs, etc)
-				if (parts.length >= 3 && parts.length % 2 === 1) {
-					const newNodes = [];
-					for (let i = 0; i < parts.length; i++) {
-						if (parts[i]) {
-							newNodes.push({ type: 'text', value: parts[i] });
-						}
-						if (i < parts.length - 1) {
-							newNodes.push({
-								type: 'superscript',
-								data: { hName: 'sup' },
-								children: [{ type: 'text', value: parts[i + 1] }]
-							});
-						}
-					}
-					changes.push({ parent, index, nodes: newNodes });
-				}
-			}
-
-			// Process subscript ~text~ (but not ~~ which is strikethrough)
-			if (value.includes('~') && !value.includes('~~')) {
-				const parts = value.split('~');
-				if (parts.length >= 3 && parts.length % 2 === 1) {
-					const newNodes = [];
-					for (let i = 0; i < parts.length; i++) {
-						if (parts[i]) {
-							newNodes.push({ type: 'text', value: parts[i] });
-						}
-						if (i < parts.length - 1) {
-							newNodes.push({
-								type: 'subscript',
-								data: { hName: 'sub' },
-								children: [{ type: 'text', value: parts[i + 1] }]
-							});
-						}
-					}
-					changes.push({ parent, index, nodes: newNodes });
-				}
+			const nodes = parseExtendedInline(node.value).filter((item) => item.value !== '');
+			if (nodes.length > 1 || nodes[0]?.type !== 'text') {
+				changes.push({ parent, index, nodes });
 			}
 		});
 
-		// Apply changes in reverse order to preserve indices
 		changes.sort((a, b) => b.index - a.index);
 		for (const change of changes) {
 			change.parent.children.splice(change.index, 1, ...change.nodes);

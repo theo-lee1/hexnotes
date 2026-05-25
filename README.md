@@ -41,6 +41,28 @@ tags:
 ---
 ```
 
+## 文章图片
+
+文章图片统一放在 `public/image/posts/{文章slug}/` 目录下。`public` 会作为网站根目录发布，所以 Markdown 里不要写 `public/image/...`，应使用以 `/image/` 开头的路径。
+
+推荐结构：
+
+```text
+public/image/posts/my-post/
+  cover.webp
+  image-01.webp
+  image-02.webp
+```
+
+Markdown 引用示例：
+
+```md
+![封面](/image/posts/my-post/cover.webp)
+![配图](/image/posts/my-post/image-01.webp)
+```
+
+建议优先使用 WebP 图片，正文图片按 `image-01.webp`、`image-02.webp` 递增命名，单张图片尽量控制在 500KB 以内。
+
 ## 页面结构
 
 - `/` - 首页
