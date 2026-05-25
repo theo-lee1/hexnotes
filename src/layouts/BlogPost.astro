@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
 import { formatDate, getCategoryColor, slugify } from '../lib/content';
 import { SITE_AUTHOR, SITE_TITLE } from '../consts';
+import { withBase } from '../lib/urls';
 
 interface Props {
 	post: CollectionEntry<'blog'>;
@@ -18,7 +19,7 @@ interface MarkdownHeading {
 const { post, headings } = Astro.props;
 const toc = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
 const accent = getCategoryColor(post.data.category);
-const postUrl = new URL(`/blog/${post.id}/`, Astro.site);
+const postUrl = new URL(withBase(`/blog/${post.id}/`), Astro.site);
 const structuredData = {
 	'@context': 'https://schema.org',
 	'@type': 'BlogPosting',
@@ -52,7 +53,7 @@ const structuredData = {
 	<article class="reading-page">
 		<header class="reading-header" style={`--note-accent: ${accent}`}>
 			<div class="reading-header-meta">
-				<a class="reading-header-category" href={`/categories/${slugify(post.data.category)}/`}>
+				<a class="reading-header-category" href={withBase(`/categories/${slugify(post.data.category)}/`)}>
 					{post.data.category}
 				</a>
 				<time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
@@ -62,7 +63,7 @@ const structuredData = {
 			<div class="topic-chips">
 				{
 					post.data.tags.map((tag) => (
-						<a href={`/tags/${slugify(tag)}/`} class="topic-chip">
+						<a href={withBase(`/tags/${slugify(tag)}/`)} class="topic-chip">
 							<span class="topic-chip-prefix" aria-hidden="true">#</span>
 							<span>{tag}</span>
 						</a>

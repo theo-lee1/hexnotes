@@ -9,6 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const site = process.env.SITE_URL ?? 'https://www.hexnotes.cc';
+const base = process.env.BASE_PATH;
 
 // 构建前清理 category-colors.json 中已不存在的分类
 const CATEGORY_COLORS_PATH = path.resolve('./category-colors.json');
@@ -64,6 +65,7 @@ function categoryCleanupIntegration() {
 // https://astro.build/config
 export default defineConfig({
 	site,
+	base,
 	integrations: [mdx(), sitemap(), categoryCleanupIntegration()],
 	markdown: {
 		remarkPlugins: [[remarkGfm, { singleTilde: false }], remarkSuperscriptSubscript],

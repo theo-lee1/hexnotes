@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import PageHero from '../../components/PageHero.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { countBy, getTagColor, slugify } from '../../lib/content';
+import { withBase } from '../../lib/urls';
 
 const posts = await getCollection('blog', ({ data }) => !data.draft);
 const tags = countBy(posts, (post) => post.data.tags);
@@ -15,7 +16,7 @@ const tags = countBy(posts, (post) => post.data.tags);
 			<div class="tag-cloud-grid">
 				{
 					tags.map(([tag, count]) => (
-						<a class="tag-node" href={`/tags/${slugify(tag)}/`} style={`--tag-accent: ${getTagColor(tag)}`}>
+						<a class="tag-node" href={withBase(`/tags/${slugify(tag)}/`)} style={`--tag-accent: ${getTagColor(tag)}`}>
 							<strong>{tag}</strong>
 							<span class="tag-node-count">{count} 篇</span>
 						</a>

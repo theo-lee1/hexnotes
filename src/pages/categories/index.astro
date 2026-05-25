@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import PageHero from '../../components/PageHero.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { countBy, getCategoryColor, slugify } from '../../lib/content';
+import { withBase } from '../../lib/urls';
 
 const posts = await getCollection('blog', ({ data }) => !data.draft);
 const categories = countBy(posts, (post) => post.data.category);
@@ -13,7 +14,7 @@ const categories = countBy(posts, (post) => post.data.category);
 	<div class="category-browser">
 		<div class="category-browser-grid">
 			{categories.map(([category, count]) => (
-				<a class="category-browser-card" href={`/categories/${slugify(category)}/`} style={`--cat-accent: ${getCategoryColor(category)}`}>
+				<a class="category-browser-card" href={withBase(`/categories/${slugify(category)}/`)} style={`--cat-accent: ${getCategoryColor(category)}`}>
 					<div class="category-browser-card-head">
 						<span class="category-browser-dot"></span>
 						<strong>{category}</strong>

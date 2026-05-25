@@ -1,4 +1,6 @@
 ---
+import { withBase } from '../lib/urls';
+
 interface Props {
   currentPage: number;
   totalPages: number;
@@ -32,9 +34,9 @@ function getPages(current: number, total: number): (number | '...')[] {
 }
 
 const pages = getPages(currentPage, totalPages);
-const prevUrl = currentPage <= 2 ? baseUrl : `${baseUrl}/${currentPage - 1}`;
-const nextUrl = `${baseUrl}/${currentPage + 1}`;
-const getPageUrl = (page: number) => page === 1 ? baseUrl : `${baseUrl}/${page}`;
+const prevUrl = withBase(currentPage <= 2 ? baseUrl : `${baseUrl}/${currentPage - 1}`);
+const nextUrl = withBase(`${baseUrl}/${currentPage + 1}`);
+const getPageUrl = (page: number) => withBase(page === 1 ? baseUrl : `${baseUrl}/${page}`);
 ---
 
 {totalPages > 1 && (

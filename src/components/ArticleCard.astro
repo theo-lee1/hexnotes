@@ -1,13 +1,14 @@
 ---
 import type { BlogPost } from '../lib/content';
 import { formatDate, getCategoryColor, slugify } from '../lib/content';
+import { withBase } from '../lib/urls';
 
 interface Props {
 	post: BlogPost;
 }
 
 const { post } = Astro.props;
-const href = `/blog/${post.id}/`;
+const href = withBase(`/blog/${post.id}/`);
 const accent = getCategoryColor(post.data.category);
 
 // 将 hex 颜色转换为 CSS rgb 格式
@@ -24,7 +25,7 @@ const accentRgb = hexToRgb(accent);
 <article class="note-card article-card-concept article-card-concept-index-slab" style={`--note-accent: ${accent}; --note-accent-rgb: ${accentRgb}`}>
 	<div class="article-card-concept-body note-card-body">
 		<p class="article-card-concept-meta note-card-meta">
-			<a href={`/categories/${slugify(post.data.category)}/`} class="note-card-category">{post.data.category}</a>
+			<a href={withBase(`/categories/${slugify(post.data.category)}/`)} class="note-card-category">{post.data.category}</a>
 			<time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
 		</p>
 		<h3>
@@ -37,7 +38,7 @@ const accentRgb = hexToRgb(accent);
 		<div class="topic-chips">
 			{
 				post.data.tags.map((tag) => (
-					<a href={`/tags/${slugify(tag)}/`} class="topic-chip">
+					<a href={withBase(`/tags/${slugify(tag)}/`)} class="topic-chip">
 						<span class="topic-chip-prefix" aria-hidden="true">#</span>
 						<span>{tag}</span>
 					</a>

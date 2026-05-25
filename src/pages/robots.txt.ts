@@ -1,10 +1,11 @@
 export function GET({ site }) {
 	const origin = site?.origin ?? 'https://www.hexnotes.cc';
+	const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 	const body = [
 		'User-agent: *',
 		'Allow: /',
-		`Sitemap: ${origin}/sitemap-index.xml`,
-		`Sitemap: ${origin}/rss.xml`,
+		`Sitemap: ${origin}${base}/sitemap-index.xml`,
+		`Sitemap: ${origin}${base}/rss.xml`,
 		'',
 	].join('\n');
 

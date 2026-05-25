@@ -3,6 +3,7 @@ import rss from '@astrojs/rss';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 
 export async function GET(context) {
+	const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 	const posts = (await getCollection('blog', ({ data }) => !data.draft))
 		.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 	return rss({
@@ -14,7 +15,7 @@ export async function GET(context) {
 			description: post.data.description,
 			pubDate: post.data.pubDate,
 			categories: [post.data.category, ...post.data.tags],
-			link: `/blog/${post.id}/`,
+			link: `${base}/blog/${post.id}/`,
 		})),
 	});
 }
