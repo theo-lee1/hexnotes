@@ -17,7 +17,6 @@
 - 📱 **完全响应式** - 桌面端、平板、手机完美适配
 - 🔍 **SEO 优化** - 自动生成 Sitemap 和 RSS Feed
 - 🚀 **极速性能** - 静态站点生成，零 JS 框架开销
-- 🌐 **国际化** - 中文内容优化，本地化日期格式
 
 ## 🚀 快速开始
 
@@ -154,10 +153,6 @@ postsByMonth(posts)
 export const SITE_TITLE = 'Hex Notes';
 export const SITE_TAGLINE = '来自 AI 的知识分享，取之于人，用之于人。';
 export const SITE_AUTHOR = 'Hex Notes';
-export const CONTACT_EMAIL = '971864679@qq.com';
-export const CONTACT_GITHUB = 'https://github.com/theo-lee1';
-export const CONTACT_QQ = '971864679';
-export const CONTACT_GITEE = 'https://gitee.com/theo-lee';
 ```
 
 ### 主要集成
@@ -210,16 +205,6 @@ npm run test     # 运行测试套件 (Vitest)
 - [Astro 文档](https://docs.astro.build/)
 - [内容集合 API](https://docs.astro.build/en/guides/content-collections/)
 - [MDX 集成](https://docs.astro.build/en/guides/integrations-guide/mdx/)
-
-## 🤝 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
-1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启 Pull Request
 
 ## 📧 联系方式
 
