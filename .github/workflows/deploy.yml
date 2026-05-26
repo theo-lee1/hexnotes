@@ -36,8 +36,7 @@ jobs:
 
       - name: Build
         env:
-          SITE_URL: https://theo-lee1.github.io
-          BASE_PATH: /hexnotes
+          SITE_URL: https://www.hexnotes.cc
         run: npm run build
 
       - name: Upload artifact
