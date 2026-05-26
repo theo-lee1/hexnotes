@@ -38,6 +38,11 @@ const allPosts = JSON.parse(postsJson);
 const searchSummary = document.getElementById('search-summary');
 const searchResults = document.getElementById('search-results');
 const paginationEl = document.getElementById('pagination');
+const searchLab = document.querySelector('.search-lab');
+
+function scrollToResults() {
+  searchLab?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+}
 
 function searchPosts(query, posts) {
   if (!query.trim()) return [];
@@ -182,7 +187,7 @@ function render(query, page = 1) {
       const p = parseInt(btn.dataset.page);
       const q = decodeURIComponent(btn.dataset.query);
       render(q, p);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollToResults();
     });
   });
 
@@ -191,7 +196,7 @@ function render(query, page = 1) {
       const p = parseInt(btn.dataset.page);
       const q = decodeURIComponent(btn.dataset.query);
       render(q, p);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollToResults();
     });
   });
 }

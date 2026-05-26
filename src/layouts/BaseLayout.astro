@@ -47,6 +47,11 @@ const {
 			</main>
 			<Footer />
 		</div>
+		<button class="scroll-top-button" type="button" aria-label="回到顶部" title="回到顶部" data-scroll-top>
+			<svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17">
+				<path d="m6 11 6-6 6 6M12 6v13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+			</svg>
+		</button>
 		<script is:inline>
 			// @ts-nocheck
 			const readPx = (styles, name, fallback) => {
@@ -133,6 +138,51 @@ const {
 				clearCardGrid(hoverTarget);
 				hoverTarget = null;
 			};
+			const scrollbarZone = {
+				frame: 0,
+				pointer: null,
+				coarse: window.matchMedia('(pointer: coarse)').matches,
+			};
+			const hasVerticalScroll = (element) => {
+				if (!(element instanceof Element)) return false;
+				const styles = window.getComputedStyle(element);
+				if (!/(auto|scroll|overlay)/.test(styles.overflowY)) return false;
+				return element.scrollHeight > element.clientHeight + 1;
+			};
+			const isInVerticalScrollbarZone = ({ clientX, clientY }) => {
+				if (scrollbarZone.coarse) return false;
+				const root = document.documentElement;
+				if (root.scrollHeight > root.clientHeight + 1 && clientX >= window.innerWidth - 7) return true;
+				const elements = document.elementsFromPoint(clientX, clientY);
+				for (const element of elements) {
+					if (!hasVerticalScroll(element)) continue;
+					const rect = element.getBoundingClientRect();
+					if (clientY < rect.top || clientY > rect.bottom) continue;
+					if (clientX >= rect.right - 7 && clientX <= rect.right + 1) return true;
+				}
+				return false;
+			};
+			const updateScrollbarZone = () => {
+				scrollbarZone.frame = 0;
+				const active = scrollbarZone.pointer ? isInVerticalScrollbarZone(scrollbarZone.pointer) : false;
+				document.documentElement.classList.toggle('is-scrollbar-zone-hover', active);
+			};
+			const handleScrollbarZoneMove = (event) => {
+				scrollbarZone.pointer = event;
+				if (!scrollbarZone.frame) scrollbarZone.frame = window.requestAnimationFrame(updateScrollbarZone);
+			};
+			const clearScrollbarZone = () => {
+				scrollbarZone.pointer = null;
+				document.documentElement.classList.remove('is-scrollbar-zone-hover');
+			};
+			const scrollTopButton = document.querySelector('[data-scroll-top]');
+			const updateScrollTopButton = () => {
+				if (!(scrollTopButton instanceof HTMLElement)) return;
+				scrollTopButton.classList.toggle('is-visible', window.scrollY > 520);
+			};
+			scrollTopButton?.addEventListener('click', () => {
+				window.scrollTo({ top: 0, behavior: 'smooth' });
+			});
 			const updateHover = (event) => {
 				const target = event.target instanceof Element ? event.target.closest(motionSelector) : null;
 				if (target && !(target instanceof HTMLElement)) return;
@@ -158,17 +208,28 @@ const {
 				}
 			};
 			updateGridHeight();
+			updateScrollTopButton();
 			for (let i = 0; i < 6; i++) window.setTimeout(createCharge, i * 220);
 			window.setInterval(() => {
 				createCharge();
 				createCharge();
 			}, 3000);
-			window.addEventListener('resize', updateGridHeight);
-			window.addEventListener('scroll', updateGridHeight, { passive: true });
+			window.addEventListener('resize', () => {
+				updateGridHeight();
+				updateScrollTopButton();
+			});
+			window.addEventListener('scroll', () => {
+				updateGridHeight();
+				updateScrollTopButton();
+			}, { passive: true });
 			window.addEventListener('pointerover', updateHover, { passive: true });
 			window.addEventListener('pointermove', updateHover, { passive: true });
+			window.addEventListener('pointermove', handleScrollbarZoneMove, { passive: true });
 			window.addEventListener('pointerdown', addPulse, { passive: true });
-			window.addEventListener('pointerleave', clearHover);
+			window.addEventListener('pointerleave', () => {
+				clearHover();
+				clearScrollbarZone();
+			});
 		</script>
 	</body>
 </html>

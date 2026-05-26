@@ -10,27 +10,17 @@ const { Content } = await render(entry);
 ---
 
 <BaseLayout title={`${entry.data.title} | Hex Notes`} description={entry.data.description}>
-	<div class="about-page">
-		<div class="reading-page">
-			<header class="reading-header">
-				<h1>{entry.data.title}</h1>
-				<p>{entry.data.description}</p>
-			</header>
-			<div class="reading-surface about-reading">
+	<article class="reading-page">
+		<header class="reading-header">
+			<h1>{entry.data.title}</h1>
+			<p>{entry.data.description}</p>
+		</header>
+		<div class="reading-layout">
+			<div class="reading-surface">
 				<div class="prose markdown-content markdown-body">
 					<Content />
 				</div>
 			</div>
 		</div>
-	</div>
+	</article>
 </BaseLayout>
-
-<style>
-	.about-page {
-		padding: 0 var(--space-page);
-	}
-
-	.about-reading {
-		margin: 0 auto;
-	}
-</style>
