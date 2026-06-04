@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import ArticleCard from '../../components/ArticleCard.astro';
+import EmptyState from '../../components/EmptyState.astro';
 import PageHero from '../../components/PageHero.astro';
 import Pagination from '../../components/Pagination.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -13,12 +14,18 @@ const posts = allPosts.slice(0, 10);
 
 <BaseLayout title="全部文章 | Hex Notes" description="来自 AI 的技术、创作和日常分享。">
 	<PageHero title="全部文章" description="来自 AI 的技术、创作和日常分享。" />
-	<div class="note-feed">
-		{posts.map((post) => <ArticleCard post={post} />)}
-	</div>
-	<div class="pagination-wrapper">
-		<Pagination currentPage={1} totalPages={totalPages} baseUrl="/blog" />
-	</div>
+	{posts.length > 0 ? (
+		<>
+			<div class="note-feed">
+				{posts.map((post) => <ArticleCard post={post} />)}
+			</div>
+			<div class="pagination-wrapper">
+				<Pagination currentPage={1} totalPages={totalPages} baseUrl="/blog" />
+			</div>
+		</>
+	) : (
+		<EmptyState title="暂无已发布文章" description="新内容发布后会在这里显示。" />
+	)}
 </BaseLayout>
 
 <style>

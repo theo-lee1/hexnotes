@@ -73,14 +73,14 @@ const tags = tagCounts.slice(0, 10);
 							<span class="terminal-command">posts --latest 5</span>
 						</div>
 						<div class="terminal-response posts-list">
-							{latest.map((post, i) => (
+							{latest.length > 0 ? latest.map((post, i) => (
 								<div class="terminal-post">
 									<span class="terminal-index">[0{i + 1}]</span>
 									<a href={withBase(`/categories/${slugify(post.data.category)}/`)} class="terminal-cat" style={`color: ${getCategoryColor(post.data.category)}`}>[{post.data.category}]</a>
 									<a href={withBase(`/blog/${post.id}/`)} class="terminal-post-title">{post.data.title}</a>
 									<span class="terminal-date">{formatDate(post.data.pubDate)}</span>
 								</div>
-							))}
+							)) : <span class="terminal-empty">暂无已发布文章</span>}
 						</div>
 
 						<div class="terminal-line">
@@ -88,12 +88,12 @@ const tags = tagCounts.slice(0, 10);
 							<span class="terminal-command">tags --list</span>
 						</div>
 						<div class="terminal-response categories-list">
-							{tags.map(([tag, count]) => (
+							{tags.length > 0 ? tags.map(([tag, count]) => (
 								<a href={withBase(`/tags/${slugify(tag)}/`)} class="terminal-cat-item">
 									<span class="terminal-cat-name"># {tag}</span>
 									<span class="terminal-cat-count">({count})</span>
 								</a>
-							))}
+							)) : <span class="terminal-empty">暂无可用标签</span>}
 						</div>
 
 						<div class="terminal-line">
@@ -255,6 +255,7 @@ const tags = tagCounts.slice(0, 10);
 
 	.terminal-ok { color: var(--green); }
 	.terminal-info { color: var(--cyan); }
+	.terminal-empty { color: var(--ink-soft); }
 
 	.posts-list {
 		display: grid;

@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import EmptyState from '../../components/EmptyState.astro';
 import PageHero from '../../components/PageHero.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { countBy, getTagColor, slugify } from '../../lib/content';
@@ -11,18 +12,22 @@ const tags = countBy(posts, (post) => post.data.tags);
 
 <BaseLayout title="标签 | Hex Notes" description="用关键词快速找到相关文章。">
 	<PageHero title="标签" description="用关键词快速找到相关文章。" />
-	<section class="tag-atlas tag-atlas-cloud">
-		<div class="tag-stage tag-stage-cloud">
-			<div class="tag-cloud-grid">
-				{
-					tags.map(([tag, count]) => (
-						<a class="tag-node" href={withBase(`/tags/${slugify(tag)}/`)} style={`--tag-accent: ${getTagColor(tag)}`}>
-							<strong>{tag}</strong>
-							<span class="tag-node-count">{count} 篇</span>
-						</a>
-					))
-				}
+	{tags.length > 0 ? (
+		<section class="tag-atlas tag-atlas-cloud">
+			<div class="tag-stage tag-stage-cloud">
+				<div class="tag-cloud-grid">
+					{
+						tags.map(([tag, count]) => (
+							<a class="tag-node" href={withBase(`/tags/${slugify(tag)}/`)} style={`--tag-accent: ${getTagColor(tag)}`}>
+								<strong>{tag}</strong>
+								<span class="tag-node-count">{count} 篇</span>
+							</a>
+						))
+					}
+				</div>
 			</div>
-		</div>
-	</section>
+		</section>
+	) : (
+		<EmptyState title="暂无标签" description="文章使用标签后，这里会自动生成索引。" />
+	)}
 </BaseLayout>

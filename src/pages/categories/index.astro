@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import EmptyState from '../../components/EmptyState.astro';
 import PageHero from '../../components/PageHero.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { countBy, getCategoryColor, slugify } from '../../lib/content';
@@ -11,19 +12,23 @@ const categories = countBy(posts, (post) => post.data.category);
 
 <BaseLayout title="分类 | Hex Notes" description="按分类查看所有文章。">
 	<PageHero title="分类" description="按分类查看所有文章。" />
-	<div class="category-browser">
-		<div class="category-browser-grid">
-			{categories.map(([category, count]) => (
-				<a class="category-browser-card" href={withBase(`/categories/${slugify(category)}/`)} style={`--cat-accent: ${getCategoryColor(category)}`}>
-					<div class="category-browser-card-head">
-						<span class="category-browser-dot"></span>
-						<strong>{category}</strong>
-					</div>
-					<span class="category-browser-count">{count} 篇</span>
-				</a>
-			))}
+	{categories.length > 0 ? (
+		<div class="category-browser">
+			<div class="category-browser-grid">
+				{categories.map(([category, count]) => (
+					<a class="category-browser-card" href={withBase(`/categories/${slugify(category)}/`)} style={`--cat-accent: ${getCategoryColor(category)}`}>
+						<div class="category-browser-card-head">
+							<span class="category-browser-dot"></span>
+							<strong>{category}</strong>
+						</div>
+						<span class="category-browser-count">{count} 篇</span>
+					</a>
+				))}
+			</div>
 		</div>
-	</div>
+	) : (
+		<EmptyState title="暂无分类" description="发布文章并设置分类后，这里会自动汇总。" />
+	)}
 </BaseLayout>
 
 <style>

@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import EmptyState from '../../components/EmptyState.astro';
 import PageHero from '../../components/PageHero.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { formatDate, postsByMonth } from '../../lib/content';
@@ -12,7 +13,7 @@ const months = postsByMonth(posts);
 <BaseLayout title="归档 | Hex Notes" description="按发布时间查看所有文章。">
 	<div class="page-stack">
 		<PageHero title="归档" description="按发布时间查看所有文章。" />
-		<div class="archive-rail">
+		{months.length > 0 ? <div class="archive-rail">
 			{
 				months.map(([month, items], index) => (
 					<details class="archive-month" open={index === 0}>
@@ -32,7 +33,7 @@ const months = postsByMonth(posts);
 					</details>
 				))
 			}
-		</div>
+		</div> : <EmptyState title="暂无归档" description="文章发布后会按月份整理在这里。" />}
 	</div>
 
 	<script is:inline>

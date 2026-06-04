@@ -383,6 +383,7 @@ select option {
 }
 
 .site-nav a {
+  position: relative;
   border-radius: 0;
   padding: 9px 12px;
   color: var(--ink-soft);
@@ -395,14 +396,26 @@ select option {
 }
 
 .site-nav a.is-active {
-  background: rgba(124, 183, 255, 0.16);
+  background: rgba(124, 183, 255, 0.055);
   color: var(--ink);
   box-shadow: none;
+}
+
+.site-nav a.is-active::after {
+  content: '';
+  position: absolute;
+  right: 12px;
+  bottom: 5px;
+  left: 12px;
+  height: 1px;
+  background: var(--blue);
 }
 
 .site-header-search {
   justify-self: stretch;
   width: 100%;
+  max-width: 520px;
+  margin-inline: auto;
 }
 
 .site-menu-toggle,
@@ -2079,6 +2092,41 @@ select option {
   line-height: 1.7;
 }
 
+.empty-state {
+  display: flex;
+  min-height: 180px;
+  align-items: center;
+  gap: 14px;
+  margin-top: 34px;
+  padding: clamp(24px, 4vw, 48px);
+  color: var(--ink-soft);
+}
+
+.empty-state-mark {
+  width: 18px;
+  height: 1px;
+  flex: none;
+  background: var(--blue);
+}
+
+.empty-state strong,
+.empty-state p {
+  margin: 0;
+}
+
+.empty-state strong {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-weight: 500;
+}
+
+.empty-state p {
+  margin-top: 5px;
+  font-size: 0.86rem;
+  line-height: 1.65;
+}
+
 .section-block,
 .page-heading,
 .reading-header {
@@ -2143,16 +2191,6 @@ select option {
   background: transparent;
   padding: 0;
   font-size: inherit;
-}
-
-.page-heading::after,
-.reading-header::after {
-  content: '+';
-  position: absolute;
-  right: 14px;
-  top: 10px;
-  color: var(--ink-soft);
-  font-family: var(--font-geist-mono), monospace;
 }
 
 .topic-matrix {
@@ -8842,17 +8880,15 @@ select option {
     top: 100%;
     right: 0;
     left: 0;
-    z-index: 0;
+    z-index: 70;
     display: block;
     max-height: min(calc(100svh - 64px), 440px);
     overflow: hidden;
     border: 0;
     border-bottom: 1px solid rgba(226, 232, 240, 0.14);
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.014)),
-      rgba(8, 11, 16, 0.985);
+    background: rgb(8, 11, 16);
     box-shadow: 0 26px 62px rgba(0, 0, 0, 0.42);
-    backdrop-filter: blur(22px);
+    backdrop-filter: none;
     opacity: 0;
     pointer-events: none;
     transform: translateY(-6px);
