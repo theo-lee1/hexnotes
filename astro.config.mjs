@@ -11,9 +11,20 @@ import path from 'node:path';
 const site = process.env.SITE_URL ?? 'https://www.hexnotes.cc';
 const base = process.env.BASE_PATH;
 
+function resolveContentDir() {
+	const configured = process.env.CONTENT_DIR;
+	if (configured && fs.existsSync(configured)) return configured;
+	if (fs.existsSync('./content')) return './content';
+	return './src/content';
+}
+
+const CONTENT_DIR = resolveContentDir();
+
 // 构建前清理 category-colors.json 中已不存在的分类
 const CATEGORY_COLORS_PATH = path.resolve('./category-colors.json');
-const BLOG_DIR = './src/content/blog';
+const BLOG_DIR = path.join(CONTENT_DIR, 'blog');
+const CONTENT_IMAGES_DIR = path.join(CONTENT_DIR, 'images');
+const PUBLIC_IMAGES_DIR = path.resolve('./public/images');
 
 function loadCategoryColors() {
 	try {
@@ -26,8 +37,8 @@ function loadCategoryColors() {
 
 function getActualCategories() {
 	try {
-		return fs.readdirSync(BLOG_DIR)
-			.filter(f => f.endsWith('.md') || f.endsWith('.mdx'))
+		return fs.readdirSync(BLOG_DIR, { recursive: true })
+			.filter(f => typeof f === 'string' && (f.endsWith('.md') || f.endsWith('.mdx')))
 			.map(f => {
 				const src = fs.readFileSync(path.join(BLOG_DIR, f), 'utf-8');
 				const match = src.match(/^---\r?\n([\s\S]*?)\r?\n---/);
@@ -42,13 +53,21 @@ function getActualCategories() {
 	}
 }
 
+function syncContentImages() {
+	fs.rmSync(PUBLIC_IMAGES_DIR, { recursive: true, force: true });
+	if (!fs.existsSync(CONTENT_IMAGES_DIR)) return;
+	fs.mkdirSync(PUBLIC_IMAGES_DIR, { recursive: true });
+	fs.cpSync(CONTENT_IMAGES_DIR, PUBLIC_IMAGES_DIR, { recursive: true });
+}
+
 // 自定义集成用于在构建前执行清理
-function categoryCleanupIntegration() {
+function contentRepositoryIntegration() {
 	return {
-		name: 'category-cleanup',
+		name: 'content-repository',
 		hooks: {
 			'astro:build:start'() {
 				const CATEGORY_COLORS_PATH = path.resolve('./category-colors.json');
+				syncContentImages();
 				const cats = getActualCategories();
 				const colors = loadCategoryColors();
 				const next = Object.fromEntries(
@@ -66,7 +85,7 @@ function categoryCleanupIntegration() {
 export default defineConfig({
 	site,
 	base,
-	integrations: [mdx(), sitemap(), categoryCleanupIntegration()],
+	integrations: [mdx(), sitemap(), contentRepositoryIntegration()],
 	markdown: {
 		remarkPlugins: [[remarkGfm, { singleTilde: false }], remarkSuperscriptSubscript],
 		shikiConfig: {

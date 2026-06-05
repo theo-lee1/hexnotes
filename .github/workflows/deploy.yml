@@ -5,6 +5,9 @@ on:
     branches:
       - master
   workflow_dispatch:
+  repository_dispatch:
+    types:
+      - content-updated
 
 permissions:
   contents: read
@@ -22,6 +25,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Checkout content
+        uses: actions/checkout@v4
+        with:
+          repository: theo-lee1/hexnotes-content
+          path: content
+          token: ${{ secrets.HEXNOTES_CONTENT_TOKEN }}
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -37,6 +47,7 @@ jobs:
       - name: Build
         env:
           SITE_URL: https://www.hexnotes.cc
+          CONTENT_DIR: ./content
         run: npm run build
 
       - name: Upload artifact

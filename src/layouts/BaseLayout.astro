@@ -11,6 +11,7 @@ interface Props {
 	publishedTime?: Date;
 	modifiedTime?: Date;
 	tags?: string[];
+	image?: string;
 	structuredData?: Record<string, unknown> | Record<string, unknown>[];
 }
 
@@ -21,6 +22,7 @@ const {
 	publishedTime,
 	modifiedTime,
 	tags,
+	image,
 	structuredData,
 } = Astro.props;
 ---
@@ -35,6 +37,7 @@ const {
 			publishedTime={publishedTime}
 			modifiedTime={modifiedTime}
 			tags={tags}
+			image={image}
 			structuredData={structuredData}
 		/>
 	</head>
@@ -131,7 +134,7 @@ const {
 			};
 			/** @type {HTMLElement | null} */
 			let hoverTarget = null;
-			const motionSelector = '.console-masthead,.console-feature,.console-visual,.console-index,.index-row,.console-topics,.console-timeline,.comment-line,.topic-route-feature,.topic-route,.note-card,.tag-cloud-grid,.tag-node,.category-browser-card,.reading-surface,.site-footer,.archive-rail,.archive-month-toggle,.archive-event,.pagination';
+			const motionSelector = '.console-masthead,.console-feature,.console-visual,.console-index,.index-row,.console-topics,.console-timeline,.reading-header,.comment-line,.topic-route-feature,.topic-route,.note-card,.tag-cloud-grid,.tag-node,.category-browser-card,.reading-surface,.site-footer,.archive-rail,.archive-month-toggle,.archive-event,.pagination';
 			const clearHover = () => {
 				hoverTarget?.querySelector(':scope > .motion-hotspot')?.remove();
 				hoverTarget?.classList.remove('is-motion-hover');
@@ -230,6 +233,14 @@ const {
 				clearHover();
 				clearScrollbarZone();
 			});
+		</script>
+		<script is:inline>
+			if (['www.hexnotes.cc', 'hexnotes.cc'].includes(window.location.hostname)) {
+				const busuanzi = document.createElement('script');
+				busuanzi.src = 'https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js';
+				busuanzi.defer = true;
+				document.body.append(busuanzi);
+			}
 		</script>
 	</body>
 </html>

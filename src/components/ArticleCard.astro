@@ -22,7 +22,7 @@ function hexToRgb(hex: string): string {
 const accentRgb = hexToRgb(accent);
 ---
 
-<article class="note-card article-card-concept article-card-concept-index-slab" style={`--note-accent: ${accent}; --note-accent-rgb: ${accentRgb}`}>
+<article class:list={['note-card article-card-concept article-card-concept-index-slab', { 'has-cover': post.data.heroImage }]} style={`--note-accent: ${accent}; --note-accent-rgb: ${accentRgb}`}>
 	<div class="article-card-concept-body note-card-body">
 		<p class="article-card-concept-meta note-card-meta">
 			<a href={withBase(`/categories/${slugify(post.data.category)}/`)} class="note-card-category">{post.data.category}</a>
@@ -33,6 +33,12 @@ const accentRgb = hexToRgb(accent);
 		</h3>
 		<p>{post.data.description}</p>
 	</div>
+
+	{post.data.heroImage && (
+		<a class="note-card-cover" href={href} aria-label={`阅读 ${post.data.title}`}>
+			<img src={withBase(post.data.heroImage)} alt="" loading="lazy" />
+		</a>
+	)}
 
 	<div class="article-card-concept-bottom note-card-bottom">
 		<div class="topic-chips">

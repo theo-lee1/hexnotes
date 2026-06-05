@@ -38,6 +38,7 @@ const structuredData = {
 	},
 	keywords: post.data.tags,
 	articleSection: post.data.category,
+	...(post.data.heroImage ? { image: new URL(withBase(post.data.heroImage), Astro.site).toString() } : {}),
 };
 ---
 
@@ -48,29 +49,45 @@ const structuredData = {
 	publishedTime={post.data.pubDate}
 	modifiedTime={post.data.updatedDate ?? post.data.pubDate}
 	tags={post.data.tags}
+	image={post.data.heroImage ? withBase(post.data.heroImage) : undefined}
 	structuredData={structuredData}
 >
 	<article class="reading-page">
 		<header class="reading-header" style={`--note-accent: ${accent}`}>
-			<div class="reading-header-meta">
-				<a class="reading-header-category" href={withBase(`/categories/${slugify(post.data.category)}/`)}>
-					{post.data.category}
-				</a>
-				<time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
-			</div>
-			<h1>{post.data.title}</h1>
-			<p>{post.data.description}</p>
-			<div class="topic-chips">
-				{
-					post.data.tags.map((tag) => (
-						<a href={withBase(`/tags/${slugify(tag)}/`)} class="topic-chip">
-							<span class="topic-chip-prefix" aria-hidden="true">#</span>
-							<span>{tag}</span>
-						</a>
-					))
-				}
+			<div class="reading-header-content">
+				<div class="reading-header-meta">
+					<a class="reading-header-category" href={withBase(`/categories/${slugify(post.data.category)}/`)}>
+						{post.data.category}
+					</a>
+					<time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+					<span class="page-view-stat" id="busuanzi_container_page_pv" style="display: none" aria-label="文章阅读量">
+						<svg class="page-view-eye" aria-hidden="true" viewBox="0 0 24 24" width="14" height="14">
+							<path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+							<circle cx="12" cy="12" r="2.7" fill="none" stroke="currentColor" stroke-width="1.7" />
+						</svg>
+						<span id="busuanzi_value_page_pv"></span>
+					</span>
+				</div>
+				<h1>{post.data.title}</h1>
+				<p>{post.data.description}</p>
+				<div class="topic-chips">
+					{
+						post.data.tags.map((tag) => (
+							<a href={withBase(`/tags/${slugify(tag)}/`)} class="topic-chip">
+								<span class="topic-chip-prefix" aria-hidden="true">#</span>
+								<span>{tag}</span>
+							</a>
+						))
+					}
+				</div>
 			</div>
 		</header>
+
+		{post.data.heroImage && (
+			<figure class="reading-cover-banner">
+				<img src={withBase(post.data.heroImage)} alt={`${post.data.title} 封面`} loading="eager" />
+			</figure>
+		)}
 
 		<div class="reading-layout">
 			<div class="reading-surface">

@@ -56,9 +56,7 @@ hexnotes/
 │   │   ├── ArticleCard.astro
 │   │   ├── Header.astro
 │   │   └── Footer.astro
-│   ├── content/
-│   │   ├── config.ts      # 内容集合配置
-│   │   └── blog/          # 博客文章 (Markdown/MDX)
+│   ├── content.config.ts  # 内容集合配置
 │   ├── layouts/           # 页面布局
 │   ├── pages/             # 路由页面
 │   │   ├── index.astro
@@ -79,9 +77,28 @@ hexnotes/
 
 ## 📝 内容管理
 
+Hex Notes 使用“代码仓库 + 内容仓库”的分离模式：
+
+- 代码仓库：`theo-lee1/hexnotes`，存放 Astro 主题、组件、样式、构建配置。
+- 内容仓库：`theo-lee1/hexnotes-content`，存放文章、独立页面和图片。
+
+本地开发时，项目优先读取根目录 `content/`；如果没有这个目录，则回退读取 `src/content/` 中的本地测试内容。GitHub Pages 构建时会自动 checkout `theo-lee1/hexnotes-content` 到 `content/`，并用它生成正式网站。
+
+### 内容仓库结构
+
+```text
+hexnotes-content/
+├── blog/                 # 博客文章 Markdown/MDX
+│   └── my-post.md
+├── pages/                # 独立页面内容
+│   └── about.md
+└── images/               # 文章图片
+    └── 2026/example.png
+```
+
 ### 创建新文章
 
-在 `src/content/blog/` 目录下创建 `.md` 或 `.mdx` 文件：
+在内容仓库的 `content/blog/` 目录下创建 `.md` 或 `.mdx` 文件：
 
 ```markdown
 ---
@@ -92,13 +109,22 @@ category: "技术"
 tags: ["Astro", "Web开发"]
 accent: "#ff6b6b"
 featured: true
-heroImage: "/images/hero.png"
+heroImage: /images/2026/hero.png
 ---
 
 # 文章内容
 
 你的内容写在这里...
+
+![正文图片](/images/2026/example.png)
 ```
+
+说明：
+
+- 正文图片和封面图都放在内容仓库的 `content/images/`，文章里用 `/images/...` 引用。
+- 构建时 `content/images/` 会同步到代码仓库的 `public/images/` 输出目录。
+- `heroImage` 使用站点公共路径，例如 `/images/2026/hero.png`。
+- 如果只想在正文中插图，不需要写 `heroImage`。
 
 ### 前置信息字段说明
 
@@ -111,7 +137,60 @@ heroImage: "/images/hero.png"
 | `tags` | string[] | 文章标签 | ✅ |
 | `accent` | string | 主题色 (十六进制) | ❌ |
 | `featured` | boolean | 是否为精选文章 | ❌ |
-| `heroImage` | string | 文章头图路径 | ❌ |
+| `heroImage` | string | 文章头图公共路径，例如 `/images/2026/hero.png` | ❌ |
+
+### 本地关联内容仓库
+
+如果你要在本地预览真实文章，可以把内容仓库克隆到项目根目录的 `content/`：
+
+```bash
+git clone https://github.com/theo-lee1/hexnotes-content.git content
+npm run dev
+```
+
+`content/` 已加入 `.gitignore`，不会被代码仓库提交。这样以后代码修改和文章修改互不覆盖。
+
+### 发布文章
+
+发布文章的流程是修改内容仓库：
+
+```bash
+cd content
+git add blog images pages
+git commit -m "post: add new article"
+git push
+```
+
+然后回到代码仓库，手动触发 GitHub Pages workflow，或者在代码仓库有新提交时自动构建。正式构建会组合“最新代码 + 最新内容”。
+
+如果希望内容仓库一 push 就自动部署，需要在 `hexnotes-content` 仓库添加 workflow，向代码仓库发送 `content-updated` 事件：
+
+```yaml
+name: Notify Hex Notes
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger site rebuild
+        run: |
+          curl -L \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.HEXNOTES_DEPLOY_TOKEN }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/theo-lee1/hexnotes/dispatches \
+            -d '{"event_type":"content-updated"}'
+```
+
+`HEXNOTES_DEPLOY_TOKEN` 需要放在内容仓库的 `Settings -> Secrets and variables -> Actions` 中。使用 fine-grained token 时，目标仓库选择 `theo-lee1/hexnotes`，权限给 `Contents: Read and write` 即可触发 `repository_dispatch`。
 
 ## 🛣️ 路由
 

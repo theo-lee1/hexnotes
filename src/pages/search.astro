@@ -6,6 +6,9 @@ import { getCategoryColor, slugify, sortPosts } from '../lib/content';
 
 const posts = sortPosts(await getCollection('blog', ({ data }) => !data.draft));
 const POSTS_PER_PAGE = 10;
+const baseUrl = import.meta.env.BASE_URL.endsWith('/')
+  ? import.meta.env.BASE_URL.slice(0, -1)
+  : import.meta.env.BASE_URL;
 
 const postsData = posts.map(p => ({
   id: p.id,
@@ -16,11 +19,9 @@ const postsData = posts.map(p => ({
   tags: p.data.tags.map((tag) => ({ name: tag, slug: slugify(tag) })),
   pubDate: p.data.pubDate,
   categoryColor: getCategoryColor(p.data.category),
+  heroImage: p.data.heroImage ? `${baseUrl}${p.data.heroImage}` : undefined,
 }));
 const postsJson = JSON.stringify(postsData);
-const baseUrl = import.meta.env.BASE_URL.endsWith('/')
-  ? import.meta.env.BASE_URL.slice(0, -1)
-  : import.meta.env.BASE_URL;
 ---
 
 <BaseLayout title="搜索 | Hex Notes" description="搜索文章、分类和标签。">
@@ -149,7 +150,7 @@ function render(query, page = 1) {
     const safeCategorySlug = escapeAttr(post.categorySlug);
 
     return `
-    <article class="note-card article-card-concept article-card-concept-index-slab" style="--note-accent: ${accent}; --note-accent-rgb: ${accentRgb}">
+    <article class="note-card article-card-concept article-card-concept-index-slab ${post.heroImage ? 'has-cover' : ''}" style="--note-accent: ${accent}; --note-accent-rgb: ${accentRgb}">
       <div class="article-card-concept-body note-card-body">
         <p class="article-card-concept-meta note-card-meta">
           <a href="${baseUrl}/categories/${safeCategorySlug}/" class="note-card-category">${safeCategory}</a>
@@ -160,6 +161,11 @@ function render(query, page = 1) {
         </h3>
         <p>${safeDescription}</p>
       </div>
+      ${post.heroImage ? `
+        <a class="note-card-cover" href="${href}" aria-label="阅读 ${escapeAttr(post.title)}">
+          <img src="${escapeAttr(post.heroImage)}" alt="" loading="lazy">
+        </a>
+      ` : ''}
       <div class="article-card-concept-bottom note-card-bottom">
         <div class="topic-chips">
           ${post.tags.map(tag => `
