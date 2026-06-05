@@ -63,3 +63,33 @@ describe('footer contact links', () => {
     expect(css).toMatch(/\.site-footer-contact-link\[aria-label="Gitee"\]\s+svg\s*\{[^}]*width:\s*15px;[^}]*height:\s*15px;/s);
   });
 });
+
+describe('homepage terminal mark', () => {
+  it('pins the ASCII mark to a bundled mono font and tunes its proportions', () => {
+    const source = read('src/pages/index.astro');
+    const head = read('src/components/BaseHead.astro');
+    const css = read('src/styles/global.css');
+
+    expect(head).toContain("@fontsource/cascadia-mono/latin-400.css");
+    expect(head).toContain("@fontsource/cascadia-mono/symbols2-400.css");
+    expect(css).toContain('--font-ascii: "Cascadia Mono", Consolas');
+    expect(source).toMatch(/\.terminal-ascii\s*\{[\s\S]*?font-family:\s*var\(--font-ascii\), monospace;/);
+    expect(source).toContain('font-variant-ligatures: none;');
+    expect(source).toContain('letter-spacing: 0.01em;');
+    expect(source).toContain('transform: scaleX(0.90) scaleY(1.14);');
+    expect(source).toContain('<pre class="terminal-ascii mobile-only">{mobileAscii}</pre>');
+  });
+});
+
+describe('homepage mobile latest posts', () => {
+  it('keeps latest posts to category, title, and month-day date on one mobile row', () => {
+    const source = read('src/pages/index.astro');
+
+    expect(source).toContain('const formatMonthDay');
+    expect(source).toContain('terminal-date terminal-date--full');
+    expect(source).toContain('terminal-date terminal-date--short');
+    expect(source).toMatch(/\.terminal-post\s*\{[\s\S]*?grid-template-columns:\s*auto minmax\(0, 1fr\) auto;/);
+    expect(source).toMatch(/\.terminal-post \.terminal-index\s*\{[\s\S]*?display:\s*none;/);
+    expect(source).toMatch(/\.terminal-date--full\s*\{[\s\S]*?display:\s*none;/);
+  });
+});

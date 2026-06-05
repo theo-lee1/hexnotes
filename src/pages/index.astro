@@ -10,6 +10,32 @@ const latest = posts.slice(0, 5);
 const categories = countBy(posts, (post) => post.data.category);
 const tagCounts = countBy(posts, (p) => p.data.tags);
 const tags = tagCounts.slice(0, 10);
+const formatMonthDay = (date: Date) =>
+	new Intl.DateTimeFormat('zh-CN', {
+		month: '2-digit',
+		day: '2-digit',
+	}).format(date);
+
+const desktopAscii = `██╗  ██╗███████╗██╗  ██╗███╗   ██╗ ██████╗ ████████╗███████╗███████╗
+██║  ██║██╔════╝╚██╗██╔╝████╗  ██║██╔═══██╗╚══██╔══╝██╔════╝██╔════╝
+███████║█████╗   ╚███╔╝ ██╔██╗ ██║██║   ██║   ██║   █████╗  ███████╗
+██╔══██║██╔══╝   ██╔██╗ ██║╚██╗██║██║   ██║   ██║   ██╔══╝  ╚════██║
+██║  ██║███████╗██╔╝ ██╗██║ ╚████║╚██████╔╝   ██║   ███████╗███████║
+╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝    ╚═╝   ╚══════╝╚══════╝`;
+
+const mobileAscii = `██╗  ██╗███████╗██╗  ██╗
+██║  ██║██╔════╝╚██╗██╔╝
+███████║█████╗   ╚███╔╝
+██╔══██║██╔══╝   ██╔██╗
+██║  ██║███████╗██╔╝ ██╗
+╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
+
+███╗   ██╗ ██████╗ ████████╗███████╗███████╗
+████╗  ██║██╔═══██╗╚══██╔══╝██╔════╝██╔════╝
+██╔██╗ ██║██║   ██║   ██║   █████╗  ███████╗
+██║╚██╗██║██║   ██║   ██║   ██╔══╝  ╚════██║
+██║ ╚████║╚██████╔╝   ██║   ███████╗███████║
+╚═╝  ╚═══╝ ╚═════╝    ╚═╝   ╚══════╝╚══════╝`;
 ---
 
 <BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
@@ -31,27 +57,8 @@ const tags = tagCounts.slice(0, 10);
 					<!-- 欢迎信息 -->
 					<div class="terminal-welcome">
 						<h1 class="sr-only">{SITE_TITLE}</h1>
-						<pre class="terminal-ascii desktop-only">
-██╗  ██╗███████╗██╗  ██╗███╗   ██╗ ██████╗ ████████╗███████╗███████╗
-██║  ██║██╔════╝╚██╗██╔╝████╗  ██║██╔═══██╗╚══██╔══╝██╔════╝██╔════╝
-███████║█████╗   ╚███╔╝ ██╔██╗ ██║██║   ██║   ██║   █████╗  ███████╗
-██╔══██║██╔══╝   ██╔██╗ ██║╚██╗██║██║   ██║   ██║   ██╔══╝  ╚════██║
-██║  ██║███████╗██╔╝ ██╗██║ ╚████║╚██████╔╝   ██║   ███████╗███████║
-╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝    ╚═╝   ╚══════╝╚══════╝</pre>
-<pre class="terminal-ascii mobile-only">
-██╗  ██╗███████╗██╗  ██╗
-██║  ██║██╔════╝╚██╗██╔╝
-███████║█████╗   ╚███╔╝
-██╔══██║██╔══╝   ██╔██╗
-██║  ██║███████╗██╔╝ ██╗
-╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
-
-███╗   ██╗ ██████╗ ████████╗███████╗███████╗
-████╗  ██║██╔═══██╗╚══██╔══╝██╔════╝██╔════╝
-██╔██╗ ██║██║   ██║   ██║   █████╗  ███████╗
-██║╚██╗██║██║   ██║   ██║   ██╔══╝  ╚════██║
-██║ ╚████║╚██████╔╝   ██║   ███████╗███████║
-╚═╝  ╚═══╝ ╚═════╝    ╚═╝   ╚══════╝╚══════╝</pre>
+						<pre class="terminal-ascii desktop-only">{desktopAscii}</pre>
+						<pre class="terminal-ascii mobile-only">{mobileAscii}</pre>
 						<p class="terminal-subtitle">{SITE_TAGLINE}</p>
 					</div>
 
@@ -85,7 +92,8 @@ const tags = tagCounts.slice(0, 10);
 									<span class="terminal-index">[0{i + 1}]</span>
 									<a href={withBase(`/categories/${slugify(post.data.category)}/`)} class="terminal-cat" style={`color: ${getCategoryColor(post.data.category)}`}>[{post.data.category}]</a>
 									<a href={withBase(`/blog/${post.id}/`)} class="terminal-post-title">{post.data.title}</a>
-									<span class="terminal-date">{formatDate(post.data.pubDate)}</span>
+									<span class="terminal-date terminal-date--full">{formatDate(post.data.pubDate)}</span>
+									<span class="terminal-date terminal-date--short">{formatMonthDay(post.data.pubDate)}</span>
 								</div>
 							)) : <span class="terminal-empty">暂无已发布文章</span>}
 						</div>
@@ -113,7 +121,7 @@ const tags = tagCounts.slice(0, 10);
 					<div class="terminal-nav">
 						<a href={withBase('/blog')} class="terminal-nav-item">
 							<span class="terminal-nav-cmd">ls</span>
-							<span class="terminal-nav-desc">/articles</span>
+							<span class="terminal-nav-desc">/blog</span>
 						</a>
 						<a href={withBase('/categories')} class="terminal-nav-item">
 							<span class="terminal-nav-cmd">ls</span>
@@ -210,11 +218,18 @@ const tags = tagCounts.slice(0, 10);
 	}
 
 	.terminal-ascii {
-		font-family: var(--font-geist-mono), monospace;
+		font-family: var(--font-ascii), monospace;
 		font-size: clamp(0.8rem, 2.5vw, 1.2rem);
+		font-variant-ligatures: none;
+		font-synthesis: none;
+		letter-spacing: 0.01em;
 		color: var(--cyan);
-		line-height: 1.15;
-		margin: 0 0 12px;
+		line-height: 1;
+		margin: 0 0 30px;
+		white-space: pre;
+		width: max-content;
+		transform: scaleX(0.90) scaleY(1.14);
+		transform-origin: left top;
 	}
 
 	.desktop-only { display: block; }
@@ -298,6 +313,10 @@ const tags = tagCounts.slice(0, 10);
 	.terminal-date {
 		color: var(--ink-soft);
 		font-size: 1rem;
+	}
+
+	.terminal-date--short {
+		display: none;
 	}
 
 	.categories-list {
@@ -386,7 +405,7 @@ const tags = tagCounts.slice(0, 10);
 
 	.terminal-ascii.mobile-only {
 		font-size: clamp(0.45rem, 2vw, 0.7rem);
-		overflow-x: auto;
+		overflow: visible;
 	}
 
 	.terminal-subtitle {
@@ -394,28 +413,39 @@ const tags = tagCounts.slice(0, 10);
 	}
 
 	.terminal-post {
-		grid-template-columns: 32px 1fr;
-		grid-template-rows: auto auto;
-		gap: 4px 8px;
+		grid-template-columns: auto minmax(0, 1fr) auto;
+		grid-template-rows: auto;
+		gap: 0 8px;
+		white-space: nowrap;
 	}
 
 	.terminal-post .terminal-index {
-		grid-row: 1;
+		display: none;
 	}
 
 	.terminal-post .terminal-cat {
+		grid-column: 1;
 		grid-row: 1;
+		font-size: 0.85rem;
 	}
 
 	.terminal-post .terminal-post-title {
 		grid-column: 2;
 		grid-row: 1;
 		font-size: 0.85rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
-	.terminal-post .terminal-date {
-		grid-column: 1 / -1;
-		grid-row: 2;
+	.terminal-date--full {
+		display: none;
+	}
+
+	.terminal-date--short {
+		display: inline;
+		grid-column: 3;
+		grid-row: 1;
 		font-size: 0.75rem;
 	}
 

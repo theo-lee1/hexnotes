@@ -17,6 +17,7 @@
     "@astrojs/mdx": "^5.0.6",
     "@astrojs/rss": "^4.0.18",
     "@astrojs/sitemap": "^3.7.2",
+    "@fontsource/cascadia-mono": "^5.2.3",
     "@fontsource/noto-serif-sc": "^5.2.9",
     "@napi-rs/pinyin": "^1.7.7",
     "astro": "^6.3.7",

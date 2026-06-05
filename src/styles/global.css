@@ -30,6 +30,7 @@
   --surface-sheen: rgba(226, 232, 240, 0.035);
   --font-display: var(--font-noto-serif-sc, "Noto Serif SC"), "Songti SC", "华文中宋", "STZhongsong", "STSong", "华文宋体", "SimSun", "宋体", serif;
   --font-body: var(--font-display);
+  --font-ascii: "Cascadia Mono", Consolas, "SFMono-Regular", "Liberation Mono", Menlo, monospace;
   --font-geist-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   --motion-fast: 160ms;
   --motion-base: 220ms;
