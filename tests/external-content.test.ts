@@ -38,6 +38,14 @@ describe('external content repository integration', () => {
     expect(workflow).toContain('CONTENT_DIR: ./content');
   });
 
+  it('persists generated category colors back to the content repository', () => {
+    const workflow = read('.github/workflows/deploy.yml');
+
+    expect(workflow).toContain('Commit category colors');
+    expect(workflow).toContain('git -C content add category-colors.json');
+    expect(workflow).toContain('git -C content push');
+  });
+
   it('documents that publishing articles happens in the content repository', () => {
     const readme = read('README.md');
     const gitignore = read('.gitignore');

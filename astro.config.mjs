@@ -20,9 +20,8 @@ function resolveContentDir() {
 
 const CONTENT_DIR = resolveContentDir();
 
-// 构建前清理 category-colors.json 中已不存在的分类
-const CATEGORY_COLORS_PATH = path.resolve('./category-colors.json');
 const BLOG_DIR = path.join(CONTENT_DIR, 'blog');
+const CATEGORY_COLORS_PATH = path.resolve(CONTENT_DIR, 'category-colors.json');
 const CONTENT_IMAGES_DIR = path.join(CONTENT_DIR, 'images');
 const PUBLIC_IMAGES_DIR = path.resolve('./public/images');
 
@@ -66,7 +65,6 @@ function contentRepositoryIntegration() {
 		name: 'content-repository',
 		hooks: {
 			'astro:build:start'() {
-				const CATEGORY_COLORS_PATH = path.resolve('./category-colors.json');
 				syncContentImages();
 				const cats = getActualCategories();
 				const colors = loadCategoryColors();
@@ -74,7 +72,7 @@ function contentRepositoryIntegration() {
 					Object.entries(colors).filter(([k]) => cats.includes(k))
 				);
 				if (Object.keys(next).length !== Object.keys(colors).length) {
-					fs.writeFileSync(CATEGORY_COLORS_PATH, JSON.stringify(next, null, 2));
+					fs.writeFileSync(CATEGORY_COLORS_PATH, `${JSON.stringify(next, null, 2)}\n`);
 				}
 			},
 		},

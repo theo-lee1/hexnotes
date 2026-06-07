@@ -4,37 +4,47 @@ import path from 'node:path';
 
 export type BlogPost = CollectionEntry<'blog'>;
 
-const CATEGORY_COLORS_PATH = path.resolve('./category-colors.json');
+function resolveContentDir() {
+	const configured = process.env.CONTENT_DIR;
+	if (configured && fs.existsSync(configured)) return configured;
+	if (fs.existsSync('./content')) return './content';
+	return './src/content';
+}
+
+function resolveCategoryColorsPath() {
+	return path.resolve(resolveContentDir(), 'category-colors.json');
+}
 
 // 分类颜色池 - 精选风格
 export const COLOR_POOL = [
-	'#FF5C5C', // 红
-	'#FF9F43', // 橙
-	'#84CC16', // 青柠
-	'#4ADE80', // 绿
 	'#22D3EE', // 湖蓝
-	'#60A5FA', // 蓝
+	'#FF9F43', // 橙
 	'#C084FC', // 洋红
-	'#FB7185', // 珊瑚
-	'#F97316', // 深橙
-	'#FF2BD6', // 品红
+	'#4ADE80', // 绿
 	'#FF003C', // 深红
-	'#DDDDDD', // 浅灰
-	'#2979FF', // 天蓝
-	'#FF3300', // 橙红
-	'#C1FF72', // 浅绿
-	'#FFF000', // 亮黄
-	'#FF007A', // 深粉
-	'#8000FF', // 紫
+	'#60A5FA', // 蓝
 	'#F8B4FF', // 浅粉
+	'#84CC16', // 青柠
 	'#FF4D00', // 橙红
+	'#2979FF', // 天蓝
+	'#FB7185', // 珊瑚
 	'#455A64', // 蓝灰
+	'#FFF000', // 亮黄
+	'#FF5C5C', // 红
+	'#8000FF', // 紫
+	'#FF2BD6', // 品红
+	'#C1FF72', // 浅绿
+	'#F97316', // 深橙
+	'#DDDDDD', // 浅灰
+	'#FF3300', // 橙红
+	'#FF007A', // 深粉
 ];
 
 function loadCategoryColors(): Record<string, string> {
+	const categoryColorsPath = resolveCategoryColorsPath();
 	try {
-		if (fs.existsSync(CATEGORY_COLORS_PATH)) {
-			return JSON.parse(fs.readFileSync(CATEGORY_COLORS_PATH, 'utf-8'));
+		if (fs.existsSync(categoryColorsPath)) {
+			return JSON.parse(fs.readFileSync(categoryColorsPath, 'utf-8'));
 		}
 	} catch {
 		// ignore
@@ -43,7 +53,15 @@ function loadCategoryColors(): Record<string, string> {
 }
 
 function saveCategoryColors(colors: Record<string, string>) {
-	fs.writeFileSync(CATEGORY_COLORS_PATH, JSON.stringify(colors, null, 2));
+	const categoryColorsPath = resolveCategoryColorsPath();
+	fs.mkdirSync(path.dirname(categoryColorsPath), { recursive: true });
+	fs.writeFileSync(categoryColorsPath, `${JSON.stringify(colors, null, 2)}\n`);
+}
+
+function pickNextCategoryColor(colors: Record<string, string>) {
+	const usedColors = new Set(Object.values(colors));
+	const unusedColor = COLOR_POOL.find((color) => !usedColors.has(color));
+	return unusedColor ?? COLOR_POOL[Object.keys(colors).length % COLOR_POOL.length];
 }
 
 export function getCategoryColor(category: string): string {
@@ -51,12 +69,7 @@ export function getCategoryColor(category: string): string {
 	if (colors[category]) {
 		return colors[category];
 	}
-	// 新分类：随机从池子里取一个未使用的颜色
-	const usedColors = new Set(Object.values(colors));
-	const unusedColors = COLOR_POOL.filter(c => !usedColors.has(c));
-	const nextColor =
-		unusedColors[Math.floor(Math.random() * unusedColors.length)] ||
-		COLOR_POOL[Math.abs(hashString(category)) % COLOR_POOL.length];
+	const nextColor = pickNextCategoryColor(colors);
 	colors[category] = nextColor;
 	saveCategoryColors(colors);
 	return nextColor;

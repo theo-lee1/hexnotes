@@ -68,7 +68,7 @@ const structuredData = {
 						<span id="busuanzi_value_page_pv"></span>
 					</span>
 				</div>
-				<h1>{post.data.title}</h1>
+				<h1 data-auto-title>{post.data.title}</h1>
 				<p>{post.data.description}</p>
 				<div class="topic-chips">
 					{
@@ -115,6 +115,42 @@ const structuredData = {
 
 		<script>
 		const copiedIcon = '已复制';
+		const fitReadingTitle = () => {
+			const title = document.querySelector('[data-auto-title]');
+			if (!(title instanceof HTMLElement)) return;
+
+			title.classList.remove('is-wrapped');
+			title.style.removeProperty('--reading-title-fit-size');
+			title.style.setProperty('--reading-title-space', 'nowrap');
+
+			const available = Math.floor(title.getBoundingClientRect().width);
+			if (!available) return;
+
+			const maxSize = Number.parseFloat(getComputedStyle(title).fontSize);
+			const minSize = window.matchMedia('(max-width: 720px)').matches ? 30 : 38;
+			let size = maxSize;
+			title.style.setProperty('--reading-title-fit-size', `${size}px`);
+
+			let guard = 0;
+			while (title.scrollWidth > available && size > minSize && guard < 80) {
+				size -= 1;
+				title.style.setProperty('--reading-title-fit-size', `${size}px`);
+				guard += 1;
+			}
+
+			if (title.scrollWidth > available) {
+				title.classList.add('is-wrapped');
+				title.style.setProperty('--reading-title-space', 'normal');
+			}
+		};
+		let titleFitFrame = 0;
+		const scheduleReadingTitleFit = () => {
+			window.cancelAnimationFrame(titleFitFrame);
+			titleFitFrame = window.requestAnimationFrame(fitReadingTitle);
+		};
+		scheduleReadingTitleFit();
+		window.addEventListener('resize', scheduleReadingTitleFit, { passive: true });
+		document.fonts?.ready.then(scheduleReadingTitleFit);
 
 		document.querySelectorAll('pre').forEach((pre) => {
 			const code = pre.querySelector('code');

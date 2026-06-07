@@ -50,6 +50,16 @@ jobs:
           CONTENT_DIR: ./content
         run: npm run build
 
+      - name: Commit category colors
+        run: |
+          if [ -n "$(git -C content status --porcelain -- category-colors.json)" ]; then
+            git -C content config user.name "github-actions[bot]"
+            git -C content config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git -C content add category-colors.json
+            git -C content commit -m "Update category colors"
+            git -C content push
+          fi
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

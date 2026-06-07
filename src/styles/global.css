@@ -2227,6 +2227,19 @@ select option {
   text-wrap: normal;
 }
 
+.reading-header h1[data-auto-title] {
+  max-width: 100%;
+  font-size: var(--reading-title-fit-size, var(--auto-title-size, clamp(2.8rem, 5.4vw, 5.6rem)));
+  white-space: var(--reading-title-space, nowrap);
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.reading-header h1[data-auto-title].is-wrapped {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 .reading-header > p:not(.eyebrow),
 .reading-header-content > p:not(.eyebrow) {
   max-width: min(100%, 920px);
@@ -2827,7 +2840,7 @@ select option {
 .note-card.article-card-concept-index-slab.has-cover .note-card-body {
   grid-area: body;
   z-index: 1;
-  width: 78%;
+  width: min(100%, 92%);
   padding: 0;
 }
 
@@ -2946,22 +2959,42 @@ select option {
 }
 
 .note-card.article-card-concept-index-slab .article-card-concept-body {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   gap: 7px;
 }
 
 .note-card.article-card-concept-index-slab .article-card-concept-body h3 {
   display: -webkit-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   overflow: hidden;
   font-size: clamp(1.14rem, 1.9vw, 1.52rem);
   line-height: 1.22;
+  text-wrap: normal;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
 
+.note-card.article-card-concept-index-slab .note-card-title {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  text-wrap: normal;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
 .note-card.article-card-concept-index-slab .article-card-concept-body > p:not(.note-card-meta) {
   display: -webkit-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   overflow: hidden;
   line-height: 1.55;
+  text-wrap: normal;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
@@ -8626,6 +8659,18 @@ select option {
     white-space: normal !important;
     overflow-wrap: anywhere;
     word-break: break-all;
+  }
+
+  .reading-header h1[data-auto-title] {
+    font-size: var(--reading-title-fit-size, clamp(2rem, 8.6vw, 3rem)) !important;
+    white-space: var(--reading-title-space, nowrap) !important;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .reading-header h1[data-auto-title].is-wrapped {
+    white-space: normal !important;
+    overflow-wrap: anywhere;
   }
 
   .page-heading h1,

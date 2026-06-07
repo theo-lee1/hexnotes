@@ -93,3 +93,25 @@ describe('homepage mobile latest posts', () => {
     expect(source).toMatch(/\.terminal-date--full\s*\{[\s\S]*?display:\s*none;/);
   });
 });
+
+describe('article title layout', () => {
+  it('lets article card titles use the full content width before wrapping', () => {
+    const css = read('src/styles/global.css');
+
+    expect(css).toMatch(/\.note-card\.article-card-concept-index-slab \.article-card-concept-body\s*\{[^}]*width:\s*100%;/s);
+    expect(css).toMatch(/\.note-card\.article-card-concept-index-slab \.article-card-concept-body h3\s*\{[^}]*width:\s*100%;/s);
+    expect(css).toMatch(/\.note-card\.article-card-concept-index-slab \.note-card-title\s*\{[^}]*text-wrap:\s*normal;/s);
+    expect(css).toMatch(/\.note-card\.article-card-concept-index-slab \.article-card-concept-body > p:not\(\.note-card-meta\)\s*\{[^}]*width:\s*100%;/s);
+    expect(css).toMatch(/\.note-card\.article-card-concept-index-slab \.article-card-concept-body > p:not\(\.note-card-meta\)\s*\{[^}]*text-wrap:\s*normal;/s);
+  });
+
+  it('auto-fits reading page titles before allowing them to wrap', () => {
+    const layout = read('src/layouts/BlogPost.astro');
+    const css = read('src/styles/global.css');
+
+    expect(layout).toContain('data-auto-title');
+    expect(layout).toContain('fitReadingTitle');
+    expect(css).toContain('--reading-title-fit-size');
+    expect(css).toMatch(/\.reading-header h1\[data-auto-title\]\.is-wrapped\s*\{[^}]*white-space:\s*normal;/s);
+  });
+});

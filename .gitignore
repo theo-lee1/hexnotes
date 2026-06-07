@@ -6,6 +6,8 @@ dist/
 # external content repository checkout
 /content/
 /public/images/
+/src/content/
+/category-colors.json
 
 # dependencies
 node_modules/
