@@ -72,12 +72,31 @@ describe('homepage terminal mark', () => {
 
     expect(head).toContain("@fontsource/cascadia-mono/latin-400.css");
     expect(head).toContain("@fontsource/cascadia-mono/symbols2-400.css");
-    expect(css).toContain('--font-ascii: "Cascadia Mono", Consolas');
+    expect(css).toContain('--font-ascii: "Cascadia Mono", monospace;');
     expect(source).toMatch(/\.terminal-ascii\s*\{[\s\S]*?font-family:\s*var\(--font-ascii\), monospace;/);
     expect(source).toContain('font-variant-ligatures: none;');
     expect(source).toContain('letter-spacing: 0.01em;');
     expect(source).toContain('transform: scaleX(0.90) scaleY(1.14);');
     expect(source).toContain('<pre class="terminal-ascii mobile-only">{mobileAscii}</pre>');
+  });
+});
+
+describe('site typography', () => {
+  it('pins prose to the bundled Songti-style font and technical UI to the bundled mono font', () => {
+    const head = read('src/components/BaseHead.astro');
+    const css = read('src/styles/global.css');
+
+    expect(head).toContain("@fontsource/noto-serif-sc/400.css");
+    expect(head).toContain("@fontsource/noto-serif-sc/500.css");
+    expect(head).toContain("@fontsource/noto-serif-sc/600.css");
+    expect(head).toContain("@fontsource/noto-serif-sc/700.css");
+    expect(css).toContain('--font-display: "Noto Serif SC", serif;');
+    expect(css).toContain('--font-body: "Noto Serif SC", serif;');
+    expect(css).toContain('--font-geist-mono: "Cascadia Mono", monospace;');
+    expect(css).toContain('--font-code: "Cascadia Mono", monospace;');
+    expect(css).toMatch(/\.markdown-content pre code\s*\{[^}]*font-family:\s*var\(--font-code\), monospace;/s);
+    expect(css).not.toContain('Songti SC');
+    expect(css).not.toContain('SFMono-Regular');
   });
 });
 
