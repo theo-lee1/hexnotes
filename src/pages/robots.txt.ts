@@ -5,7 +5,6 @@ export function GET({ site }) {
 		'User-agent: *',
 		'Allow: /',
 		`Sitemap: ${origin}${base}/sitemap-index.xml`,
-		`Sitemap: ${origin}${base}/rss.xml`,
 		'',
 	].join('\n');
 
