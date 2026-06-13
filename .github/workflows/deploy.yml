@@ -31,6 +31,7 @@ jobs:
           repository: theo-lee1/hexnotes-content
           path: content
           token: ${{ secrets.HEXNOTES_CONTENT_TOKEN }}
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -50,6 +51,48 @@ jobs:
           CONTENT_DIR: ./content
         run: npm run build
 
+      - name: Detect new content articles
+        id: baidu_urls
+        env:
+          BEFORE_SHA: ${{ github.event.client_payload.before }}
+          AFTER_SHA: ${{ github.event.client_payload.after }}
+        run: |
+          set -euo pipefail
+          : > baidu-urls.txt
+
+          if [ -n "${BEFORE_SHA:-}" ] && [ -n "${AFTER_SHA:-}" ] && git -C content cat-file -e "${BEFORE_SHA}^{commit}" && git -C content cat-file -e "${AFTER_SHA}^{commit}"; then
+            range="${BEFORE_SHA}..${AFTER_SHA}"
+          elif git -C content rev-parse --verify HEAD^ >/dev/null 2>&1; then
+            range="HEAD^..HEAD"
+          else
+            echo "No previous content commit available; skipping Baidu URL push."
+            echo "has_urls=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git -C content diff --name-status --diff-filter=A "$range" -- 'blog/*.md' 'blog/*.mdx' 'blog/**/*.md' 'blog/**/*.mdx' |
+            node -e '
+              const fs = require("node:fs");
+              const input = fs.readFileSync(0, "utf8").trim();
+              if (!input) process.exit(0);
+              const urls = input
+                .split(/\r?\n/)
+                .map((line) => line.split(/\t+/).pop())
+                .filter(Boolean)
+                .map((file) => file.replace(/^blog\//, "").replace(/\.(md|mdx)$/i, "").replace(/\/index$/i, ""))
+                .map((slug) => `https://www.hexnotes.cc/blog/${slug.split("/").map(encodeURIComponent).join("/")}/`);
+              fs.writeFileSync("baidu-urls.txt", `${[...new Set(urls)].join("\n")}\n`);
+            '
+
+          if [ -s baidu-urls.txt ]; then
+            echo "has_urls=true" >> "$GITHUB_OUTPUT"
+            echo "New article URLs:"
+            cat baidu-urls.txt
+          else
+            echo "has_urls=false" >> "$GITHUB_OUTPUT"
+            echo "No new article URLs to push."
+          fi
+
       - name: Commit category colors
         run: |
           if [ -n "$(git -C content status --porcelain -- category-colors.json)" ]; then
@@ -59,6 +102,21 @@ jobs:
             git -C content commit -m "Update category colors"
             git -C content push
           fi
+
+      - name: Push new article URLs to Baidu
+        if: steps.baidu_urls.outputs.has_urls == 'true'
+        env:
+          BAIDU_PUSH_TOKEN: ${{ secrets.BAIDU_PUSH_TOKEN }}
+        run: |
+          if [ -z "${BAIDU_PUSH_TOKEN:-}" ]; then
+            echo "BAIDU_PUSH_TOKEN is not configured; skipping Baidu URL push."
+            exit 0
+          fi
+
+          curl --fail-with-body -sS \
+            -H "Content-Type:text/plain" \
+            --data-binary @baidu-urls.txt \
+            "http://data.zz.baidu.com/urls?site=https://www.hexnotes.cc&token=${BAIDU_PUSH_TOKEN}" || true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

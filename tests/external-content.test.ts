@@ -46,6 +46,19 @@ describe('external content repository integration', () => {
     expect(workflow).toContain('git -C content push');
   });
 
+  it('pushes only newly added article URLs to Baidu without hard-coding the token', () => {
+    const workflow = read('.github/workflows/deploy.yml');
+
+    expect(workflow).toContain('BAIDU_PUSH_TOKEN: ${{ secrets.BAIDU_PUSH_TOKEN }}');
+    expect(workflow).toContain('Detect new content articles');
+    expect(workflow).toContain('Push new article URLs to Baidu');
+    expect(workflow).toContain('git -C content diff --name-status --diff-filter=A');
+    expect(workflow).toContain("'blog/*.md' 'blog/*.mdx' 'blog/**/*.md' 'blog/**/*.mdx'");
+    expect(workflow).toContain('https://www.hexnotes.cc/blog/');
+    expect(workflow).toContain('No new article URLs to push.');
+    expect(workflow).not.toContain('LZ8qJUIWSVR6eRCE');
+  });
+
   it('documents that publishing articles happens in the content repository', () => {
     const readme = read('README.md');
     const gitignore = read('.gitignore');
