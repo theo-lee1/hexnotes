@@ -110,6 +110,18 @@ describe('search engine verification', () => {
   });
 });
 
+describe('search engine sitemap exposure', () => {
+  it('uses a direct sitemap.xml route for crawlers instead of a sitemap index', () => {
+    const robots = read('src/pages/robots.txt.ts');
+    const sitemap = read('src/pages/sitemap.xml.ts');
+
+    expect(robots).toContain('Sitemap: ${origin}${base}/sitemap.xml');
+    expect(robots).not.toContain('sitemap-index.xml');
+    expect(sitemap).toContain("export async function GET");
+    expect(sitemap).toContain('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
+  });
+});
+
 describe('homepage mobile latest posts', () => {
   it('keeps latest posts to category, title, and month-day date on one mobile row', () => {
     const source = read('src/pages/index.astro');

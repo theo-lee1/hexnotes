@@ -4,7 +4,7 @@ export function GET({ site }) {
 	const body = [
 		'User-agent: *',
 		'Allow: /',
-		`Sitemap: ${origin}${base}/sitemap-index.xml`,
+		`Sitemap: ${origin}${base}/sitemap.xml`,
 		'',
 	].join('\n');
 
