@@ -100,6 +100,16 @@ describe('site typography', () => {
   });
 });
 
+describe('search engine verification', () => {
+  it('exposes verification meta tags for Google, Baidu, and Bing', () => {
+    const head = read('src/components/BaseHead.astro');
+
+    expect(head).toContain('<meta name="google-site-verification" content="EcvfO7AZEwNxtsYGz-0EoONs276BfElfPlngRxELdDg" />');
+    expect(head).toContain('<meta name="baidu-site-verification" content="codeva-210DQxtH7j" />');
+    expect(head).toContain('<meta name="msvalidate.01" content="612AAE2FFA0F0C20E3E0366944E1F219" />');
+  });
+});
+
 describe('homepage mobile latest posts', () => {
   it('keeps latest posts to category, title, and month-day date on one mobile row', () => {
     const source = read('src/pages/index.astro');
