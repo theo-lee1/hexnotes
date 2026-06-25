@@ -9639,3 +9639,70 @@ select option {
     text-overflow: clip !important;
   }
 }
+
+/* === Mobile card v3 (2026-06-25 21:00) ===
+   用户报告"卡片只有上半部分有文字"
+   防御性方案:mobile 直接用 block 布局,绕开 grid 的一切玄学
+*/
+@media (max-width: 720px) {
+  /* 卡片从 grid 切回 block */
+  .note-card,
+  .note-card.article-card-concept,
+  .note-card.article-card-concept-index-slab {
+    display: block !important;
+    min-height: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    overflow: visible !important;
+    padding: 14px 16px !important;
+  }
+  /* body 和 bottom 都是 block,堆叠 */
+  .note-card-body,
+  .article-card-concept-body {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 0 12px !important;
+    min-width: 0 !important;
+  }
+  .note-card-bottom,
+  .article-card-concept-bottom {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 10px 0 0 !important;
+    border-top: 1px solid rgba(226, 232, 240, 0.1) !important;
+    min-width: 0 !important;
+  }
+  /* tags 容器 */
+  .article-card-concept-bottom > div {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+  /* 标题 */
+  .note-card-title,
+  .article-card-concept-body h3 {
+    font-size: 1.15rem !important;
+    line-height: 1.28 !important;
+    margin: 6px 0 !important;
+  }
+  /* 描述 */
+  .article-card-concept-body > p:not(.note-card-meta) {
+    margin: 6px 0 0 !important;
+    line-height: 1.55 !important;
+    font-size: 0.94rem !important;
+  }
+  /* meta (category / date) */
+  .note-card-meta,
+  .article-card-concept-meta {
+    margin: 0 0 6px !important;
+    font-size: 0.72rem !important;
+  }
+}
