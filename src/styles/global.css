@@ -5381,3 +5381,97 @@ select option {
     flex-shrink: 0 !important;
   }
 }
+
+/* === Mobile card v6 (2026-06-25 21:35) ===
+   v5 issue: cards still 2-column on mobile because .note-feed has no mobile override.
+   Also title overlapped cover.
+   Fix:
+   - .note-feed: single column on mobile
+   - body: full width (no need to clear cover, cover is in top-right with its own padding zone)
+   - title: padding-right to clear cover
+   - description: padding-right to clear cover
+*/
+@media (max-width: 720px) {
+  /* Force single-column feed */
+  .note-feed,
+  .note-feed.search-result-list {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+  /* Body — full width, content with right padding to clear cover */
+  .note-card.article-card-concept-index-slab.has-cover .note-card-body {
+    width: 100% !important;
+    padding: 0 92px 0 0 !important;  /* cover area (80 + 12 margin) */
+  }
+  /* Title: clamp + padding-right to avoid overlap */
+  .note-card.article-card-concept-index-slab .article-card-concept-body h3 {
+    -webkit-line-clamp: 2 !important;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    font-size: 1.08rem !important;
+    line-height: 1.25 !important;
+    padding-right: 92px !important;  /* same as body, clear cover */
+  }
+  /* Description */
+  .note-card.article-card-concept-index-slab .article-card-concept-body > p:not(.note-card-meta) {
+    -webkit-line-clamp: 2 !important;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    font-size: .88rem !important;
+    line-height: 1.45 !important;
+    padding-right: 92px !important;
+  }
+  /* Meta — small, no padding */
+  .note-card.article-card-concept-index-slab .note-card-meta {
+    font-size: .68rem !important;
+    padding-right: 92px !important;
+  }
+  /* Cover: thumbnail top-right, already in v5 */
+  .note-card.article-card-concept-index-slab.has-cover .note-card-cover {
+    inset: 14px 14px auto auto !important;
+    width: 80px !important;
+    height: 80px !important;
+    opacity: 1 !important;
+    overflow: hidden !important;
+    border-radius: 6px !important;
+    border: 0 !important;
+    background: transparent !important;
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+    z-index: 2 !important;
+  }
+  .note-card.article-card-concept-index-slab.has-cover .note-card-cover img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  .note-card.article-card-concept-index-slab.has-cover .note-card-cover::after,
+  .note-card.article-card-concept-index-slab.has-cover .note-card-cover:after {
+    display: none !important;
+    background: none !important;
+  }
+  /* Bottom row */
+  .note-card.article-card-concept-index-slab .note-card-bottom,
+  .note-card.article-card-concept-index-slab.has-cover .note-card-bottom {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    margin-top: 12px !important;
+    padding-top: 8px !important;
+    border-top: 1px solid rgba(226, 232, 240, .08) !important;
+  }
+  .note-card .topic-chips {
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+  }
+  .read-link {
+    font-size: .82rem !important;
+    flex-shrink: 0 !important;
+  }
+}
