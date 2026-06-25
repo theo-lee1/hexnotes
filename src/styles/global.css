@@ -9706,3 +9706,133 @@ select option {
     font-size: 0.72rem !important;
   }
 }
+
+/* === Mobile card v4 (2026-06-25 21:08) — NUCLEAR OPTION ===
+   User screenshot at 390px shows card bottom is blank (tags/read missing).
+   Cards are .note-card.article-card-concept-index-slab.has-cover
+   hexnotes' own base CSS uses grid + grid-area + line-clamp:2 which is the root cause.
+   Strategy: override EVERYTHING on the card on mobile.
+*/
+@media (max-width: 720px) {
+  /* Force .note-card into block flow, kill all grid/flex internal layout */
+  .note-card,
+  .note-card.article-card-concept,
+  .note-card.article-card-concept-index-slab,
+  .note-card.article-card-concept-index-slab.has-cover {
+    display: block !important;
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+    grid-template-areas: none !important;
+    grid-area: auto !important;
+    grid: none !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    inline-size: 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding: 14px 16px !important;
+    border-radius: 0 !important;
+    border: 1px solid var(--surface-line, #e2e8f021) !important;
+    border-left: 3px solid rgba(var(--note-accent-rgb, 124,183,255), .68) !important;
+    background: transparent !important;
+    isolation: auto !important;
+  }
+  /* Kill cover entirely + take it out of grid template */
+  .note-card .note-card-cover,
+  .note-card .article-card-concept-cover {
+    display: none !important;
+    inset: auto !important;
+    position: static !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+  /* Body — block, full width, NO -webkit-box clamp */
+  .note-card-body,
+  .article-card-concept-body,
+  .note-card .note-card-body,
+  .note-card .article-card-concept-body {
+    display: block !important;
+    grid-area: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 0 12px !important;
+    z-index: auto !important;
+    overflow: visible !important;
+  }
+  /* Description — kill line-clamp:2 (was on .article-card-concept-body>p) */
+  .note-card-body > p,
+  .article-card-concept-body > p,
+  .note-card-body p,
+  .article-card-concept-body p {
+    display: block !important;
+    -webkit-line-clamp: unset !important;
+    -webkit-box-orient: horizontal !important;
+    -webkit-box: unset !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    line-height: 1.55 !important;
+    margin: 6px 0 !important;
+  }
+  .note-card-body p.note-card-meta,
+  .article-card-concept-meta {
+    font-size: .72rem !important;
+    margin: 0 0 6px !important;
+  }
+  /* Title — block */
+  .note-card-title,
+  .article-card-concept-body h3,
+  .note-card .note-card-title,
+  .note-card .article-card-concept-body h3 {
+    display: block !important;
+    -webkit-line-clamp: unset !important;
+    -webkit-box-orient: horizontal !important;
+    -webkit-box: unset !important;
+    overflow: visible !important;
+    font-size: 1.18rem !important;
+    line-height: 1.28 !important;
+    margin: 6px 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  /* Bottom — flex row, full width, always rendered */
+  .note-card-bottom,
+  .article-card-concept-bottom,
+  .note-card .note-card-bottom,
+  .note-card .article-card-concept-bottom {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    grid-area: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 10px 0 0 !important;
+    border-top: 1px solid rgba(226, 232, 240, .1) !important;
+    z-index: auto !important;
+  }
+  .article-card-concept-bottom > div,
+  .note-card-bottom > div.topic-chips {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    min-width: 0 !important;
+  }
+  /* Hide heavy decorative pseudo elements (gradient line at bottom) */
+  .note-card::after,
+  .note-card::before {
+    display: none !important;
+  }
+}
