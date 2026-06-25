@@ -9452,3 +9452,190 @@ select option {
     display: none !important;
   }
 }
+
+/* === HexNotes mobile overhaul v2 (2026-06-25) ===
+   修复:
+   1. .reading-header h1[data-auto-title] desktop fit-text 在 mobile 撑爆整页
+   2. .reading-page grid children 缺 min-width:0
+   3. .markdown-content max-width:720px 在 mobile 比 viewport 还宽
+   4. 卡片 cover 28% 透明度叠在描述文字上
+*/
+@media (max-width: 720px) {
+  /* === A. 文章详情页 === */
+
+  /* 1. H1 fit-text 强制 wrap (data-auto-title 的 white-space:nowrap 是元凶) */
+  .reading-header h1,
+  .reading-header h1[data-auto-title] {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    line-break: auto;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* 2. .reading-page 的所有直接子元素都允许缩到 viewport 宽度 */
+  .reading-page > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100%;
+  }
+  /* 防御: 即使非直接子元素,reading-page 内所有元素也别撑爆 */
+  .reading-page,
+  .reading-page * {
+    min-width: 0;
+  }
+
+  /* 3. reading-header 内部 */
+  .reading-header,
+  .reading-header-content,
+  .reading-header-meta,
+  .reading-header h1,
+  .reading-header p,
+  .reading-header .topic-chips,
+  .reading-header .topic-chips :is(a, span) {
+    max-width: 100% !important;
+  }
+  .reading-header .topic-chips {
+    flex-wrap: wrap;
+  }
+  .reading-header-meta {
+    flex-wrap: wrap;
+  }
+
+  /* 4. 封面 banner + img */
+  .reading-cover-banner,
+  .reading-cover-banner img {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: auto;
+  }
+  .reading-cover-banner img {
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  /* 5. 内容区(原本 max-width:720px,现在让 markdown-content 也别超过 viewport) */
+  .reading-layout,
+  .reading-surface,
+  .markdown-content,
+  .markdown-content > * {
+    max-width: 100% !important;
+  }
+  .markdown-content p,
+  .markdown-content li,
+  .markdown-content h1,
+  .markdown-content h2,
+  .markdown-content h3,
+  .markdown-content h4,
+  .markdown-content blockquote,
+  .markdown-content table,
+  .markdown-content pre,
+  .markdown-content code,
+  .markdown-content figure {
+    max-width: 100%;
+  }
+  /* 原本 .markdown-content p{max-width:720px} 要在 mobile 拉回 100% */
+  .markdown-content p {
+    width: 100%;
+  }
+
+  /* 6. 图片/视频/iframe 全响应 */
+  .markdown-content img,
+  .markdown-content video,
+  .markdown-content iframe,
+  .markdown-content .markdown-image,
+  .markdown-content .markdown-image img {
+    max-width: 100% !important;
+    width: auto !important;
+    height: auto !important;
+  }
+  .markdown-content figure {
+    max-width: 100%;
+  }
+  .markdown-content figure img {
+    width: 100%;
+  }
+
+  /* 7. 表格响应:横向滚动而不是撑爆 */
+  .markdown-table-wrap {
+    margin-inline: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .markdown-content table {
+    width: 100% !important;
+    table-layout: fixed;
+    word-break: break-word;
+    font-size: 0.84rem;
+  }
+  .markdown-content table th,
+  .markdown-content table td {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  /* 8. pre 已经有 inline overflow-x:auto,确保容器不撑爆 */
+  .markdown-content pre,
+  .markdown-code-block,
+  .markdown-code-block pre,
+  .markdown-code-block code {
+    max-width: 100% !important;
+    overflow-x: auto;
+  }
+
+  /* 9. 内联 code 长字符串换行 */
+  .markdown-content :not(pre) > code {
+    word-break: break-all;
+    overflow-wrap: anywhere;
+  }
+
+  /* 10. 链接/标题/段落 word-wrap */
+  .markdown-content a {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .markdown-content h1,
+  .markdown-content h2,
+  .markdown-content h3,
+  .markdown-content h4 {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* === B. 文章列表卡片 (/blog, /categories/*) === */
+
+  /* 11. 卡片封面 mobile 完全隐藏(避免压字 + 节省空间) */
+  .note-card .note-card-cover {
+    display: none !important;
+  }
+
+  /* 12. 卡片内容全宽,min-height auto 让内容决定高度 */
+  .note-card,
+  .note-card.article-card-concept,
+  .note-card.article-card-concept-index-slab.has-cover {
+    min-height: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    overflow: visible !important;
+  }
+  .note-card-body,
+  .article-card-concept-body,
+  .note-card-bottom,
+  .article-card-concept-bottom {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  /* 13. 标题/描述不限制行数(之前 -webkit-line-clamp:2 在 mobile 太短) */
+  .note-card-title,
+  .article-card-concept-body h3,
+  .article-card-concept-body > p:not(.note-card-meta) {
+    -webkit-line-clamp: unset !important;
+    display: block !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+}
