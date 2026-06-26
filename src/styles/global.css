@@ -9724,9 +9724,9 @@ select option {
     grid-template-rows: none !important;
     grid-template-areas: none !important;
     grid-area: auto !important;
-    grid: none !important;
-    min-height: 0 !important;
-    max-height: none !important;
+   grid: none !important;
+   min-height: 220px !important;
+   max-height: none !important;
     height: auto !important;
     overflow: visible !important;
     inline-size: 100% !important;
@@ -9740,18 +9740,26 @@ select option {
     background: transparent !important;
     isolation: auto !important;
   }
-  /* Kill cover entirely + take it out of grid template */
-  .note-card .note-card-cover,
-  .note-card .article-card-concept-cover {
-    display: none !important;
-    inset: auto !important;
-    position: static !important;
-    width: 0 !important;
-    height: 0 !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-  }
-  /* Body — block, full width, NO -webkit-box clamp */
+ /* Kill cover entirely + take it out of grid template */
+ .note-card .note-card-cover,
+ .note-card .article-card-concept-cover {
+   display: block !important;
+   position: absolute !important;
+   inset: 0 0 0 45% !important;
+   z-index: 0 !important;
+   opacity: 0.28 !important;
+   overflow: hidden !important;
+   pointer-events: none !important;
+   border: 0 !important;
+   mask-image: linear-gradient(90deg, transparent, #000 46%) !important;
+ }
+ .note-card .note-card-cover img {
+   display: block !important;
+   width: 100% !important;
+   height: 100% !important;
+   object-fit: cover !important;
+ }
+ /* Body — block, full width, NO -webkit-box clamp */
   .note-card-body,
   .article-card-concept-body,
   .note-card .note-card-body,
@@ -9810,7 +9818,7 @@ select option {
   .note-card .note-card-bottom,
   .note-card .article-card-concept-bottom {
     display: flex !important;
-    flex-wrap: wrap !important;
+   flex-wrap: nowrap !important;
     align-items: center !important;
     justify-content: space-between !important;
     gap: 8px !important;
@@ -9828,11 +9836,16 @@ select option {
     display: flex !important;
     flex-wrap: wrap !important;
     gap: 6px !important;
-    min-width: 0 !important;
-  }
-  /* Hide heavy decorative pseudo elements (gradient line at bottom) */
-  .note-card::after,
-  .note-card::before {
-    display: none !important;
-  }
+   min-width: 0 !important;
+ }
+ /* Keep .read-link from being shrunk or wrapped */
+ .note-card .read-link {
+   flex-shrink: 0 !important;
+   margin-left: auto !important;
+ }
+ /* Hide heavy decorative pseudo elements (gradient line at bottom) */
+ .note-card::after,
+ .note-card::before {
+   display: none !important;
+ }
 }
