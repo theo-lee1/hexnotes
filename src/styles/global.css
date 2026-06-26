@@ -9771,7 +9771,8 @@ select option {
     min-width: 0 !important;
     padding: 0 !important;
     margin: 0 0 12px !important;
-    z-index: auto !important;
+    position: relative !important;
+    z-index: 1 !important;
     overflow: visible !important;
   }
   /* Description — kill line-clamp:2 (was on .article-card-concept-body>p) */
@@ -9829,7 +9830,8 @@ select option {
     margin: 0 !important;
     padding: 10px 0 0 !important;
     border-top: 1px solid rgba(226, 232, 240, .1) !important;
-    z-index: auto !important;
+    position: relative !important;
+    z-index: 1 !important;
   }
   .article-card-concept-bottom > div,
   .note-card-bottom > div.topic-chips {
