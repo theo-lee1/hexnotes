@@ -9738,7 +9738,7 @@ select option {
     border: 1px solid rgba(var(--note-accent-rgb, 124,183,255), .18) !important;
     border-left: 3px solid rgba(var(--note-accent-rgb, 124,183,255), .68) !important;
     background: transparent !important;
-    isolation: auto !important;
+    isolation: isolate !important;
   }
  /* Kill cover entirely + take it out of grid template */
  .note-card .note-card-cover,
@@ -9854,9 +9854,9 @@ select option {
 }
 /* Mobile cover hover — override the `inset` shorthand in the v4 cover rule */
 .note-card.article-card-concept-index-slab.has-cover:hover .note-card-cover {
-  opacity: 0.82 !important;
+  opacity: 0.28 !important;
 }
 .note-card.article-card-concept-index-slab.has-cover:hover .note-card-cover img {
-  transform: scale(1.025) !important;
+  transform: none !important;
 }
 }
