@@ -9854,7 +9854,6 @@ select option {
 }
 /* Mobile cover hover — override the `inset` shorthand in the v4 cover rule */
 .note-card.article-card-concept-index-slab.has-cover:hover .note-card-cover {
-  left: 25% !important;
   opacity: 0.82 !important;
 }
 .note-card.article-card-concept-index-slab.has-cover:hover .note-card-cover img {
